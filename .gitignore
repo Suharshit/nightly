@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+node_modules/
+.next/
+.vercel/
+hf_cache/
+*.log
+data/raw/
+eval/snapshots/
