@@ -1,0 +1,109 @@
+name,ats,slug,city
+Paytm,lever,paytm,Noida
+Okta,greenhouse,okta,Bengaluru
+Zscaler,greenhouse,zscaler,Bengaluru
+Databricks,greenhouse,databricks,Bengaluru
+MongoDB,greenhouse,mongodb,Gurugram
+Tekion,ashby,tekion,Bengaluru
+Stripe,greenhouse,stripe,Bengaluru
+Rubrik,greenhouse,rubrik,Bengaluru
+Meesho,lever,meesho,Bengaluru
+HighRadius,greenhouse,highradius,Hyderabad
+Sarvam AI,ashby,sarvam,Bengaluru
+Hevo Data,lever,hevodata,Bengaluru
+Sigmoid,greenhouse,sigmoid,Bengaluru
+InMobi,greenhouse,inmobi,Bengaluru
+Zeta Global,greenhouse,zetaglobal,Bengaluru
+Supabase,ashby,supabase,Remote
+GitLab,greenhouse,gitlab,Bengaluru
+Zeta,lever,zeta,Bengaluru
+Zenoti,greenhouse,zenoti,Hyderabad
+Fivetran,greenhouse,fivetran,Bengaluru
+Razorpay,greenhouse,razorpaysoftwareprivatelimited,Bengaluru
+Squarepoint,greenhouse,squarepointcapital,Bengaluru
+Netskope,greenhouse,netskope,Bengaluru
+STAGE,greenhouse,stage,Gurugram
+HackerRank,greenhouse,hackerrank,Bengaluru
+Glean,greenhouse,gleanwork,Bengaluru
+MindTickle,lever,mindtickle,Pune
+Bureau,ashby,bureau,Bengaluru
+Elastic,greenhouse,elastic,Bengaluru
+IMC Trading,greenhouse,imc,Mumbai
+Mozilla,greenhouse,mozilla,Remote
+Twilio,greenhouse,twilio,Remote
+Agoda,greenhouse,agoda,Gurugram
+Nium,lever,nium,Mumbai
+FamPay,lever,fampay,Bengaluru
+Harness,greenhouse,harnessinc,Bengaluru
+Wikimedia,greenhouse,wikimedia,Remote
+Zinier,greenhouse,zinier,Bengaluru
+SigNoz,ashby,signoz,Remote
+Plane,ashby,plane,Hyderabad
+Airbnb,greenhouse,airbnb,Gurugram
+ClickHouse,ashby,clickhouse,Delhi
+CRED,lever,cred,Bengaluru
+Glance,greenhouse,glance,Bengaluru
+Sumo Logic,greenhouse,sumologic,Noida
+BitGo,greenhouse,bitgo,Remote
+Airwallex,ashby,airwallex,Bengaluru
+Druva,greenhouse,druva,Pune
+Commvault,greenhouse,commvault,Bengaluru
+Tower Research,greenhouse,towerresearchcapital,Gurugram
+Coinbase,greenhouse,coinbase,Remote
+Groww,greenhouse,groww,Bengaluru
+Gushwork,lever,gushwork,Bengaluru
+Datadog,greenhouse,datadog,Bengaluru
+SpotDraft,ashby,spotdraft,Bengaluru
+Zuora,greenhouse,zuora,Chennai
+Together AI,greenhouse,togetherai,Bengaluru
+Turing,greenhouse,turing,Bengaluru
+Bolna,ashby,bolna,Bengaluru
+Starburst,greenhouse,starburst,Bengaluru
+Tala,lever,tala,Remote
+Observe.AI,greenhouse,observeai,Bengaluru
+CodeRabbit,ashby,coderabbit,Bengaluru
+Neo4j,greenhouse,neo4j,Bengaluru
+Anyscale,ashby,anyscale,Bengaluru
+Composio,ashby,composio,Bengaluru
+Samsara,greenhouse,samsara,Bengaluru
+Yugabyte,greenhouse,yugabyte,Remote
+Atlan,ashby,atlan,Remote
+Binance,greenhouse,binance,Remote
+New Relic,greenhouse,newrelic,Bengaluru
+Pocket FM,lever,pocketfm,Bengaluru
+Temporal,ashby,temporal,Bengaluru
+Zapier,ashby,zapier,Remote
+Notion,ashby,notion,Hyderabad
+Figma,greenhouse,figma,Bengaluru
+Smallest AI,ashby,smallest,Mumbai
+Redis,ashby,redis,Remote
+Grafana Labs,greenhouse,grafanalabs,Remote
+Kraken,ashby,kraken.com,Remote
+ConsenSys,greenhouse,consensys,Remote
+Dremio,greenhouse,dremio,Remote
+Scale AI,greenhouse,scaleai,Remote
+Brex,greenhouse,brex,Remote
+Figure,greenhouse,figure,Remote
+Safe,lever,safe,Bengaluru
+Appian,greenhouse,appian,Chennai
+Kong,ashby,kong,Bengaluru
+100ms,lever,100ms,Bengaluru
+ElevenLabs,ashby,elevenlabs,Remote
+Storyblok,greenhouse,storyblok,Remote
+Netlify,greenhouse,netlify,Remote
+Anysphere,ashby,cursor,Bengaluru
+StackBlitz,greenhouse,stackblitz,Remote
+Mixpanel,greenhouse,mixpanel,Bengaluru
+Chainguard,greenhouse,chainguard,Remote
+Buffer,ashby,buffer,Remote
+Coursera,greenhouse,coursera,Remote
+Brave,greenhouse,brave,Remote
+PlanetScale,greenhouse,planetscale,Remote
+Bybit,greenhouse,bybit,Remote
+Deepgram,ashby,deepgram,Remote
+AssemblyAI,greenhouse,assemblyai,Remote
+Stability AI,greenhouse,stabilityai,Remote
+Socket,greenhouse,socket,Remote
+Amplitude,ashby,amplitude,Remote
+Glide,greenhouse,glide,Remote
+Duolingo,greenhouse,duolingo,Bengaluru
