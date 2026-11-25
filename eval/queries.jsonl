@@ -1,0 +1,50 @@
+{"id": "q01", "q": "python backend fresher", "level": "fresher", "city": [], "remote": false, "type": "tech+level", "intent": "Entry-level backend roles using Python"}
+{"id": "q02", "q": "frontend react intern", "level": "student", "city": [], "remote": false, "type": "tech+level", "intent": "Frontend internships with React"}
+{"id": "q03", "q": "data analyst sql excel", "level": "fresher", "city": [], "remote": false, "type": "role", "intent": "Junior data analyst roles that use SQL and Excel"}
+{"id": "q04", "q": "golang developer", "level": null, "city": [], "remote": false, "type": "exact-tech", "intent": "Roles where Go is a main language (not the English word 'go')"}
+{"id": "q05", "q": "kafka microservices java", "level": null, "city": [], "remote": false, "type": "exact-tech", "intent": "Backend roles with Kafka and Java microservices"}
+{"id": "q06", "q": "react native mobile app", "level": null, "city": [], "remote": false, "type": "exact-tech", "intent": "Cross-platform mobile roles with React Native"}
+{"id": "q07", "q": "android kotlin", "level": null, "city": [], "remote": false, "type": "exact-tech", "intent": "Native Android development"}
+{"id": "q08", "q": "ios swift developer", "level": null, "city": [], "remote": false, "type": "exact-tech", "intent": "Native iOS development"}
+{"id": "q09", "q": "server-side engineer building APIs", "level": null, "city": [], "remote": false, "type": "semantic", "intent": "Backend roles described without the word 'backend'"}
+{"id": "q10", "q": "build machine learning models in production", "level": null, "city": [], "remote": false, "type": "semantic", "intent": "ML engineering, not research or sales of ML"}
+{"id": "q11", "q": "work on LLM applications and RAG", "level": null, "city": [], "remote": false, "type": "semantic", "intent": "Applied LLM / generative AI engineering"}
+{"id": "q12", "q": "keep websites fast and reliable", "level": null, "city": [], "remote": false, "type": "semantic", "intent": "SRE / performance / reliability roles"}
+{"id": "q13", "q": "automate cloud infrastructure", "level": null, "city": [], "remote": false, "type": "semantic", "intent": "DevOps / platform / infra-as-code roles"}
+{"id": "q14", "q": "devops kubernetes aws", "level": null, "city": [], "remote": false, "type": "tech", "intent": "DevOps roles with Kubernetes on AWS"}
+{"id": "q15", "q": "terraform platform engineer", "level": null, "city": [], "remote": false, "type": "tech", "intent": "Platform engineering with Terraform"}
+{"id": "q16", "q": "full stack javascript typescript node", "level": null, "city": [], "remote": false, "type": "tech", "intent": "Full-stack JS/TS roles"}
+{"id": "q17", "q": "software engineer intern bangalore", "level": "student", "city": ["Bengaluru"], "remote": false, "type": "level+city", "intent": "Any SWE internship in Bengaluru"}
+{"id": "q18", "q": "sde 1 hyderabad", "level": "fresher", "city": ["Hyderabad"], "remote": false, "type": "level+city", "intent": "Entry-level SDE roles in Hyderabad"}
+{"id": "q19", "q": "remote python developer", "level": null, "city": [], "remote": true, "type": "remote", "intent": "Python roles open to remote work"}
+{"id": "q20", "q": "remote frontend engineer", "level": null, "city": [], "remote": true, "type": "remote", "intent": "Frontend roles open to remote work"}
+{"id": "q21", "q": "data engineer spark databricks", "level": null, "city": [], "remote": false, "type": "tech", "intent": "Data engineering with Spark / Databricks"}
+{"id": "q22", "q": "etl pipelines airflow", "level": null, "city": [], "remote": false, "type": "tech", "intent": "Data pipeline / orchestration roles"}
+{"id": "q23", "q": "business analyst entry level", "level": "fresher", "city": [], "remote": false, "type": "role+level", "intent": "Entry-level business analyst roles"}
+{"id": "q24", "q": "product manager associate", "level": "fresher", "city": [], "remote": false, "type": "role+level", "intent": "APM / associate product manager roles"}
+{"id": "q25", "q": "product management intern", "level": "student", "city": [], "remote": false, "type": "role+level", "intent": "Product internships"}
+{"id": "q26", "q": "ui ux designer figma", "level": null, "city": [], "remote": false, "type": "role", "intent": "Product / UI / UX design roles"}
+{"id": "q27", "q": "graphic design internship", "level": "student", "city": [], "remote": false, "type": "role+level", "intent": "Design internships (visual / brand)"}
+{"id": "q28", "q": "sales development representative", "level": "fresher", "city": [], "remote": false, "type": "role", "intent": "SDR / BDR roles that freshers get hired into"}
+{"id": "q29", "q": "customer success associate", "level": "fresher", "city": [], "remote": false, "type": "role", "intent": "Customer success / support for freshers"}
+{"id": "q30", "q": "digital marketing seo content", "level": null, "city": [], "remote": false, "type": "role", "intent": "Marketing, SEO and content roles"}
+{"id": "q31", "q": "finance analyst ca", "level": null, "city": [], "remote": false, "type": "role", "intent": "Finance / accounting analyst roles"}
+{"id": "q32", "q": "hr recruiter talent acquisition", "level": null, "city": [], "remote": false, "type": "role", "intent": "Recruiting / HR roles"}
+{"id": "q33", "q": "security engineer application security", "level": null, "city": [], "remote": false, "type": "role", "intent": "AppSec / product security engineering"}
+{"id": "q34", "q": "cybersecurity soc analyst", "level": null, "city": [], "remote": false, "type": "role", "intent": "Security operations / analyst roles"}
+{"id": "q35", "q": "qa automation selenium testing", "level": null, "city": [], "remote": false, "type": "tech", "intent": "QA / test automation roles"}
+{"id": "q36", "q": "embedded c++ firmware", "level": null, "city": [], "remote": false, "type": "tech", "intent": "Embedded / systems C++ roles"}
+{"id": "q37", "q": "c++ systems programming low latency", "level": null, "city": [], "remote": false, "type": "tech", "intent": "Systems / performance-critical C++"}
+{"id": "q38", "q": "ruby on rails developer", "level": null, "city": [], "remote": false, "type": "exact-tech", "intent": "Rails backend roles"}
+{"id": "q39", "q": "postgresql database engineer", "level": null, "city": [], "remote": false, "type": "tech", "intent": "Database-focused engineering"}
+{"id": "q40", "q": "computer vision deep learning", "level": null, "city": [], "remote": false, "type": "tech", "intent": "CV / deep learning engineering"}
+{"id": "q41", "q": "data scientist statistics python", "level": null, "city": [], "remote": false, "type": "role", "intent": "Data science roles"}
+{"id": "q42", "q": "blockchain web3 solidity", "level": null, "city": [], "remote": false, "type": "exact-tech", "intent": "Web3 / smart contract roles"}
+{"id": "q43", "q": "salesforce developer", "level": null, "city": [], "remote": false, "type": "exact-tech", "intent": "Salesforce platform development (not sales jobs)"}
+{"id": "q44", "q": "technical writer documentation", "level": null, "city": [], "remote": false, "type": "role", "intent": "Technical writing / docs"}
+{"id": "q45", "q": "developer advocate devrel", "level": null, "city": [], "remote": false, "type": "role", "intent": "Developer relations"}
+{"id": "q46", "q": "solutions engineer pre-sales", "level": null, "city": [], "remote": false, "type": "role", "intent": "Solutions / sales engineering"}
+{"id": "q47", "q": "operations analyst", "level": "fresher", "city": [], "remote": false, "type": "role", "intent": "Business / ops analyst roles"}
+{"id": "q48", "q": "2025 graduate software engineer", "level": "fresher", "city": [], "remote": false, "type": "level", "intent": "New-grad SWE roles"}
+{"id": "q49", "q": "jobs for cse final year students", "level": "student", "city": [], "remote": false, "type": "vague", "intent": "Any tech internship or new-grad role a CSE student can apply to"}
+{"id": "q50", "q": "work from home part time", "level": null, "city": [], "remote": true, "type": "vague", "intent": "Remote, flexible roles (few will be part-time; judge on remote first)"}

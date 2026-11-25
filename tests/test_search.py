@@ -5,7 +5,6 @@ The query vector is written by hand, so no model is loaded.
 """
 
 import pytest
-from fastapi.testclient import TestClient
 
 from api.app import main
 from api.app.search import hybrid
@@ -97,34 +96,9 @@ def test_search_filters_and_fuses(cur):
     assert {j["id"] for j in no_vec} == {both, kw_only}
 
 
-class FakeEmbedder:
-    def query(self, text):
-        return [0.0] * DIM
-
-
-class FakePool:
-    class _Conn:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *a):
-            return False
-
-        def cursor(self):
-            return self
-
-        def execute(self, *a):
-            return None
-
-    def connection(self):
-        return self._Conn()
-
-    def close(self):
-        pass
-
-
 @pytest.fixture
-def client(monkeypatch):
+def client(api, monkeypatch):
+    c, _, _ = api
     seen = {}
 
     def fake_search(cur, q, qvec, f, **kw):
@@ -136,11 +110,7 @@ def client(monkeypatch):
                  "keyword_rank": 1, "vector_rank": 2}]
 
     monkeypatch.setattr(main, "search", fake_search)
-    main.app.state.pool = FakePool()
-    main.app.state.embedder = FakeEmbedder()
-    with TestClient(main.app) as c:
-        yield c, seen
-    del main.app.state.pool, main.app.state.embedder
+    return c, seen
 
 
 def test_matches_infers_level_and_passes_filters(client):
