@@ -8,3 +8,9 @@
 - Broken: backfill.yml "empty = all" ran 10 per shard (GitHub uses the default); fixed to "0 = all".
 - Broken: the university network intercepts HTTPS (curl and Docker fail; Python works, and the hotspot works).
 - Next: Thu. Extraction backfill plan (no Ollama on an 8 GB laptop), extract.py, embed.py, hybrid /matches.
+
+## Thu 26 Nov 2026 (started Wed night)
+
+- Done: /matches (PR #6): hard filter + keyword top 50 + vector top 50 + RRF. scripts/time_matches.py, warm: local DB p95 75 ms, Supabase from the laptop p95 474 ms (target 1.5 s). Resume upload: POST /resume (PDF → text → 12–20 rules skills → bge query vector → profiles), GET /me, Supabase token check via /auth/v1/user (cached). Migration 004 (profiles.resume_skills) on local + Supabase. eval/queries.jsonl: 50 proposed queries, unlabelled.
+- Broken: qwen2.5:3b seniority labels look off in spots ("Intermediate Backend Engineer" → intern). No reranker yet, so non-engineering interns rank for "frontend react intern".
+- Next: Fri. Reranker, personalisation, diversity, reasons; agent loop; freeze the eval snapshot; label.py so the owner can label the queries; run_search_eval.py.
