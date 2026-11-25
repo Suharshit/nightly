@@ -25,6 +25,7 @@ class Request:
     use_vector: bool = True
     use_rerank: bool = True
     use_profile: bool = True
+    use_final: bool = True   # freshness + profile terms + diversity; off = rerank/fused order
     log_shown: bool = True
 
 
@@ -69,7 +70,11 @@ def run(pool, embedder, reranker, req: Request, user: dict | None) -> Result:
                       taste=p.taste if p and req.use_profile else None)
     if req.use_rerank:
         jobs = rerank(reranker, rerank_text, jobs)
-    jobs = personalise(jobs, p, use_profile=req.use_profile)[:req.limit]
+    if req.use_final:
+        jobs = personalise(jobs, p, use_profile=req.use_profile)[:req.limit]
+    else:  # the eval's "stop after this stage" variants
+        jobs = [j | {"final_score": j.get("rerank_score") or j["score"], "parts": {},
+                     "reason": ""} for j in jobs[:req.limit]]
     if p and req.log_shown and jobs:
         with pool.connection() as conn, conn.cursor() as cur:
             prof.log_shown(cur, p.user_id, [j["id"] for j in jobs])
