@@ -1,0 +1,5 @@
+# API without the models: enough for CI's tests (they use a fake embedder).
+-r ../worker/requirements.txt
+fastapi==0.165.0
+uvicorn==0.54.0
+psycopg-pool==3.3.3

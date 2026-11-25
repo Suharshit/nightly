@@ -1,0 +1,86 @@
+"""FastAPI routes. Run locally: uvicorn api.app.main:app --port 8000"""
+
+import time
+from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Annotated, Literal
+
+from fastapi import FastAPI, Query, Request
+from pydantic import BaseModel
+
+from api.app.search.hybrid import Filters, infer_level, search
+
+
+def to_pgvector(vec: list[float]) -> str:
+    return "[" + ",".join(f"{x:.6f}" for x in vec) + "]"
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Tests set these first, with a fake embedder and their own pool.
+    if not hasattr(app.state, "pool"):
+        from api.app.db import make_pool
+        app.state.pool = make_pool()
+    if not hasattr(app.state, "embedder"):
+        from api.app.models import Embedder
+        app.state.embedder = Embedder()
+    yield
+    app.state.pool.close()
+
+
+app = FastAPI(title="nightly", lifespan=lifespan)
+
+
+class Job(BaseModel):
+    id: int
+    title: str
+    company: str
+    city: str | None
+    work_mode: str | None
+    remote: bool | None
+    seniority: str | None
+    min_exp_years: int | None
+    max_exp_years: int | None
+    skills: list[str]
+    apply_url: str | None
+    posted_at: datetime | None
+    score: float
+    keyword_rank: int | None
+    vector_rank: int | None
+
+
+class Matches(BaseModel):
+    q: str
+    level: str | None
+    count: int
+    took_ms: int
+    jobs: list[Job]
+
+
+@app.get("/health")
+def health(request: Request) -> dict:
+    with request.app.state.pool.connection() as conn:
+        conn.execute("select 1")
+    return {"ok": True}
+
+
+@app.get("/matches", response_model=Matches)
+def matches(
+    request: Request,
+    q: Annotated[str, Query(min_length=1, max_length=200)],
+    level: Literal["student", "fresher", "junior"] | None = None,
+    city: Annotated[list[str] | None, Query()] = None,
+    remote: bool = False,
+    limit: Annotated[int, Query(ge=1, le=30)] = 20,
+    keyword: bool = True,
+    vector: bool = True,
+) -> Matches:
+    started = time.perf_counter()
+    level = level or infer_level(q)
+    qvec = to_pgvector(request.app.state.embedder.query(q)) if vector else None
+    f = Filters(level=level, cities=city or [], remote=remote)
+    with request.app.state.pool.connection() as conn, conn.cursor() as cur:
+        jobs = search(cur, q, qvec, f, use_keyword=keyword, use_vector=vector, limit=limit)
+    took = int((time.perf_counter() - started) * 1000)
+    return Matches(q=q, level=level, count=len(jobs), took_ms=took,
+                   jobs=[Job(**j) for j in jobs])
