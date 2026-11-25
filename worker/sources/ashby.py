@@ -13,6 +13,8 @@ from worker.text import find_city, html_to_text, india_ok
 
 SOURCE = "ashby"
 _MODES = {"onsite": "onsite", "remote": "remote", "hybrid": "hybrid"}
+_EMPLOYMENT = {"FullTime": "full_time", "PartTime": "part_time", "Intern": "intern",
+               "Contract": "contract", "Temporary": "temporary"}
 
 
 def url(slug: str) -> str:
@@ -49,6 +51,7 @@ def parse(data: dict, company: str) -> list[JobIn]:
             apply_url=j.get("jobUrl") or j.get("applyUrl"),
             posted_at=datetime.fromisoformat(posted) if posted else None,
             salary_raw=_salary(j),
+            employment_type=_EMPLOYMENT.get(j.get("employmentType") or ""),
             india_ok=india_ok(locs, remote, country),
         ))
     return jobs
