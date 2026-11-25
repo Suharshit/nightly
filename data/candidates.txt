@@ -328,3 +328,162 @@ Router Protocol|routerprotocol
 Instabase
 Zoca
 Sprinklr India|sprinklrindia
+# Batch 2 (25 Nov): YC India / Ashby-heavy startups and global companies with India offices
+Plane|plane,makeplane
+Smallest AI|smallest,smallestai
+Emergent|emergent,emergentlabs
+Superjoin
+Bolna|bolna,bolnaai
+Revrag|revrag,revragai
+Rocket|rocket,rocketnew
+Trupeer
+Pipeshift
+Hyperbots
+Toplyne
+Zocket
+Gushwork|gushwork,gushworkai
+Nected|nected,nectedai
+Leena AI|leenaai,leena
+Rocketium
+Gan.ai|ganai,gan
+Klaar|klaar,klaarhq
+Qure.ai|qureai,qure
+Tricog
+Eka Care|ekacare
+Wysa
+Shipsy
+Locus|locus,locussh
+FarEye|fareye
+Unbxd
+Vymo
+Zinier
+SpotDraft|spotdraft
+Clear|clear,cleartax,cleartaxindia
+Recko
+Fyllo
+Gnani.ai|gnani,gnaniai
+Thoughtworks|thoughtworks
+HackerRank|hackerrank
+HackerEarth|hackerearth
+Nium|nium
+Samsara|samsara
+Zuora|zuora
+Tekion|tekion,tekioncorp
+Netskope|netskope
+Clari|clari
+HighRadius|highradius
+Zenoti|zenoti
+Airbnb|airbnb
+Pinterest|pinterest
+Dropbox|dropbox
+Uber|uber
+Lyft|lyft
+Reddit|reddit
+Discord|discord
+Mattermost|mattermost
+ConsenSys|consensys
+Chainlink Labs|chainlinklabs
+Alchemy|alchemy
+Circle|circle
+Ripple|ripple
+BitGo|bitgo
+1Password|1password
+ClickHouse|clickhouse
+Cockroach Labs|cockroachlabs
+Yugabyte|yugabyte
+Couchbase|couchbase
+Redis|redis
+Neo4j|neo4j
+Dremio|dremio
+Starburst|starburst,starburstdata
+Fivetran|fivetran
+dbt Labs|dbtlabs
+Oyster HR|oyster,oysterhr
+Doist|doist
+Toggl|toggl
+GitBook|gitbook
+Hotjar|hotjar
+Docker|docker
+JetBrains|jetbrains
+Snyk|snyk
+Sentry|sentry,getsentry
+Datadog|datadog
+New Relic|newrelic
+PagerDuty|pagerduty
+Freshworks India|freshworksinc
+Postman Inc|postmaninc
+Visa|visa
+Expedia|expedia,expediagroup
+Booking|booking,bookingcom
+Delivery Hero|deliveryhero
+Careem|careem
+Gojek Tech|gojektech
+Intuit|intuit
+Atlassian India|atlassianindia
+Druva Software|druvasoftware
+Sprinklr Inc|sprinklrinc
+Mindtickle Inc|mindtickleinc
+Innovaccer Inc|innovaccerinc
+Zomato|zomato,eternal
+Swiggy Ltd|swiggyltd,bundltechnologies
+Nykaa Fashion|nykaafashion
+BrowserStack India|browserstackindia
+Unacademy Group|sorting hat,sortinghat
+Paytm Money|paytmmoney
+Paytm Insider|paytminsider,insider
+Meesho Tech|meeshotech
+PhonePe Ltd|phonepeltd,phonepeprivatelimited
+Zepto Now|zeptonow,kiranakart
+CRED Club|credclub,dreamplug
+Groww Tech|growwtech,nextbillion
+Navi Technologies|navitechnologies
+Razorpay X|razorpayx
+Juspay Technologies|juspaytechnologies,juspayin
+Cashfree Payments|cashfreepayments
+Chargebee Inc|chargebeeinc
+Zeta Tech|zetatech,betterworldtech
+PayU|payu,payuindia
+Pine Labs Ltd|pinelabsltd
+InMobi Technologies|inmobitechnologies
+Media.net|medianet
+Directi|directi
+Ola|olacabs,anitechnologies
+Myntra|myntra
+Flipkart|flipkart
+Arcesium|arcesium
+DE Shaw India|deshaw,deshawindia
+Tower Research|towerresearch,towerresearchcapital
+Graviton|graviton,gravitonresearch
+Quadeye|quadeye
+Optiver|optiver
+IMC Trading|imc,imctrading
+Jane Street|janestreet
+Squarepoint|squarepoint,squarepointcapital
+Alphagrep|alphagrep
+Sprinto Inc|sprintoinc
+Cohere|cohere
+Mistral|mistral
+Together AI|togetherai,together
+Anyscale|anyscale
+Modal|modal,modallabs
+Scale AI|scaleai,scale
+Glean|glean,gleanwork
+Writer|writer
+Jasper|jasper
+Weaviate|weaviate
+Qdrant|qdrant
+Pinecone|pinecone
+LangChain|langchain
+LlamaIndex|llamaindex
+Ramp|ramp
+Brex|brex
+Mercury|mercury
+Plaid|plaid
+Gusto|gusto
+Chime|chime
+Wise|wise,transferwise
+Revolut|revolut
+Monzo|monzo
+Airwallex|airwallex
+Thunes|thunes
+Tala|tala
