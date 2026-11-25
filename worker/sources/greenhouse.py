@@ -20,12 +20,12 @@ def url(slug: str) -> str:
 def parse(data: dict, company: str) -> list[JobIn]:
     jobs = []
     for j in data.get("jobs", []):
+        # Use only the job's own location. `offices` lists company offices tied to the
+        # posting and caused false India/remote matches (e.g. a San Francisco role).
         loc = (j.get("location") or {}).get("name")
-        offices = [o.get("name") for o in j.get("offices") or []]
-        locs = [loc, *offices]
-        remote = any(x and "remote" in x.lower() for x in locs)
+        remote = bool(loc and "remote" in loc.lower())
         posted = j.get("first_published") or j.get("updated_at")
-        city = find_city(loc) or next((c for c in map(find_city, offices) if c), None)
+        city = find_city(loc)
         jobs.append(JobIn(
             source=SOURCE,
             external_id=str(j["id"]),
@@ -38,6 +38,6 @@ def parse(data: dict, company: str) -> list[JobIn]:
             description_text=html_to_text(j.get("content")),
             apply_url=j.get("absolute_url"),
             posted_at=datetime.fromisoformat(posted) if posted else None,
-            india_ok=india_ok(locs, remote),
+            india_ok=india_ok([loc], remote),
         ))
     return jobs

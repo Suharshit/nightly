@@ -54,14 +54,14 @@ CITY_ALIASES = {
 }
 INDIA_WORDS = ("india", "karnataka", "maharashtra", "tamil nadu", "telangana", "haryana",
                "kerala", "gujarat", "west bengal", "uttar pradesh", "rajasthan", "punjab")
-# Remote roles that name one of these regions are not open to someone living in India.
-FOREIGN_WORDS = ("united states", "usa", "u.s.", " us", "us-", "(us", "canada", "europe",
-                 "european", " eu", "emea", "uk", "united kingdom", "latam", "germany",
-                 "france", "spain", "netherlands", "brazil", "mexico", "australia",
-                 "singapore", "japan", "americas", "north america", "poland", "ireland",
-                 "philippines", "argentina", "colombia", "portugal", "israel", "dubai", "uae")
-
-_WORD = re.compile(r"[a-z]+(?: [a-z]+)?")
+# A remote role with no India mention counts only if its location is made of these words alone,
+# e.g. "Remote", "Remote, Global", "Anywhere", "Remote - APAC". Anything else (a US state,
+# "EMEA", a foreign city) is treated as not open to someone in India. Precision over recall.
+OPEN_WORDS = {"remote", "hybrid", "global", "anywhere", "worldwide", "apac", "apj", "asia",
+              "asia pacific", "work from home", "wfh", "distributed", "fully remote",
+              "remote first", "remote friendly"}
+INDIA_CODES = {"IN", "IND", "INDIA"}
+_SPLIT = re.compile(r"[,;/|()\-–•:]+|\bor\b|\band\b")
 
 
 def find_city(location: str | None) -> str | None:
@@ -79,20 +79,22 @@ def mentions_india(location: str | None) -> bool:
     if not location:
         return False
     low = location.lower()
-    return find_city(location) is not None or any(w in low for w in INDIA_WORDS)
+    return find_city(location) is not None or any(
+        re.search(rf"\b{w}\b", low) for w in INDIA_WORDS)
 
 
-def mentions_foreign(location: str | None) -> bool:
-    if not location:
-        return False
-    low = f" {location.lower()}"
-    return any(w in low for w in FOREIGN_WORDS)
+def open_location(location: str | None) -> bool:
+    """True if the location names no place, only generic remote words."""
+    if not location or not location.strip():
+        return True
+    parts = [p.strip() for p in _SPLIT.split(location.lower())]
+    return all(not p or p in OPEN_WORDS for p in parts)
 
 
 def india_ok(locations: list[str | None], remote: bool, country: str | None = None) -> bool:
-    """True if any location is in India, or the role is remote with no foreign restriction."""
-    if country and country.upper() in ("IN", "IND", "INDIA"):
-        return True
+    """Located in India, or remote with no place named other than generic remote words."""
     if any(mentions_india(loc) for loc in locations):
         return True
-    return remote and not any(mentions_foreign(loc) for loc in locations)
+    if country:
+        return country.strip().upper() in INDIA_CODES
+    return remote and all(open_location(loc) for loc in locations)

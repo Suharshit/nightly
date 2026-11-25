@@ -50,6 +50,17 @@ def test_india_rules():
     assert not india_ok(["Remote - US"], remote=True)
     assert not india_ok(["San Francisco"], remote=False)
     assert india_ok(["Anywhere"], remote=False, country="IN")
+    # regressions seen in real data
+    assert not india_ok(["Remote - California"], remote=True)
+    assert not india_ok(["Remote, AMER"], remote=True)
+    assert not india_ok(["NAMER"], remote=True)
+    assert not india_ok(["Indianapolis, Indiana"], remote=False)
+    assert not india_ok(["Hybrid"], remote=False)
+    assert india_ok(["Remote, Global"], remote=True)
+    assert india_ok(["Remote - India"], remote=True)
+    assert india_ok(["Remote"], remote=True, country="IN")
+    assert not india_ok(["Remote"], remote=True, country="US")
+    assert india_ok(["Remote", "Bengaluru"], remote=True, country="US")  # India secondary loc
 
 
 def test_html_to_text():
