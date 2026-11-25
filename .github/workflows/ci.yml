@@ -31,6 +31,7 @@ jobs:
           cache-dependency-path: |
             requirements-dev.txt
             worker/requirements.txt
+            api/requirements.txt
       - run: pip install -r requirements-dev.txt
       - name: Apply schema
         run: |

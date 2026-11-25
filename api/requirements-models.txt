@@ -1,0 +1,3 @@
+# What the deployed API installs: the above plus CPU torch + sentence-transformers.
+-r requirements.txt
+-r ../worker/requirements-embed.txt
