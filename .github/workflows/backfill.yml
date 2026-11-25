@@ -2,7 +2,7 @@ name: backfill-extract
 
 # One-off LLM extraction backfill with Ollama on GitHub's runners (free on a public repo),
 # so it doesn't need the laptop. Rows are split by id % shards, so jobs never overlap.
-# Start with a small limit to measure speed, then run without one.
+# Start with a small limit to measure speed, then run with limit 0 (all pending).
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ on:
         description: Ollama model (open weights)
         default: qwen2.5:3b
       limit:
-        description: Max jobs per shard (empty = all pending)
+        description: Max jobs per shard (0 = all pending; GitHub turns an empty value into the default)
         default: "10"
 
 jobs:
@@ -42,6 +42,6 @@ jobs:
       - name: Extract shard ${{ matrix.shard }}/4
         run: |
           LIMIT=""
-          if [ -n "${{ inputs.limit }}" ]; then LIMIT="--limit ${{ inputs.limit }}"; fi
+          if [ "${{ inputs.limit }}" != "0" ]; then LIMIT="--limit ${{ inputs.limit }}"; fi
           python -m worker.extract --backend ollama --model "$OLLAMA_MODEL" \
             --shard ${{ matrix.shard }}/4 $LIMIT
