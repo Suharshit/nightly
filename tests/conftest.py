@@ -1,4 +1,4 @@
-"""Shared fakes for API route tests: no model, no Supabase, and a pool that records SQL."""
+"""Shared fakes for API route tests: no models, no Supabase, and a pool that records SQL."""
 
 import pytest
 from fastapi import HTTPException
@@ -15,6 +15,18 @@ class FakeEmbedder:
     def query(self, text):
         self.texts.append(text)
         return [0.0] * DIM
+
+
+class FakeReranker:
+    """Scores a job by how many query words its text contains (as a logit)."""
+
+    def __init__(self):
+        self.calls: list[tuple[str, list[str]]] = []
+
+    def score(self, query, texts):
+        self.calls.append((query, texts))
+        words = query.lower().split()
+        return [float(sum(w in t.lower() for w in words)) - 1.0 for t in texts]
 
 
 class FakeCursor:
@@ -65,6 +77,8 @@ def api():
     pool, embedder = FakePool(), FakeEmbedder()
     main.app.state.pool, main.app.state.embedder, main.app.state.auth = (
         pool, embedder, FakeAuth())
+    main.app.state.reranker = FakeReranker()
     with TestClient(main.app) as c:
         yield c, pool, embedder
     del main.app.state.pool, main.app.state.embedder, main.app.state.auth
+    del main.app.state.reranker

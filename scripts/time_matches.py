@@ -1,6 +1,7 @@
 """Time /matches end to end against a running API. Prints p50/p95 and the top results.
 
-Usage: python scripts/time_matches.py [base_url] [runs_per_query]
+Usage: python scripts/time_matches.py [base_url] [runs_per_query] [key=value ...]
+  e.g. ... http://localhost:8000 5 rerank=false
 """
 
 import statistics
@@ -16,6 +17,7 @@ QUERIES = ["python backend fresher", "frontend react intern", "data analyst sql"
 def main() -> None:
     base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000"
     runs = int(sys.argv[2]) if len(sys.argv) > 2 else 5
+    extra = dict(a.split("=", 1) for a in sys.argv[3:])
     with httpx.Client(base_url=base, timeout=60) as c:
         for _ in range(60):  # wait for startup (the model loads first)
             try:
@@ -29,7 +31,7 @@ def main() -> None:
         for q in QUERIES:
             for i in range(runs):
                 t = time.perf_counter()
-                r = c.get("/matches", params={"q": q, "limit": 5})
+                r = c.get("/matches", params={"q": q, "limit": 5} | extra)
                 wall.append((time.perf_counter() - t) * 1000)
                 r.raise_for_status()
                 body = r.json()
@@ -39,7 +41,8 @@ def main() -> None:
                     for j in body["jobs"]:
                         print(f"  {j['title'][:55]:55} | {j['company'][:16]:16} | "
                               f"{j['seniority'] or '-':7} | {j['city'] or '-'} "
-                              f"[kw {j['keyword_rank']}, vec {j['vector_rank']}]")
+                              f"[kw {j['keyword_rank']}, vec {j['vector_rank']}, "
+                              f"rr {j.get('rerank_score')}]")
     for name, xs in (("wall ms", wall), ("server ms", server)):
         xs = sorted(xs)
         p95 = xs[max(0, round(0.95 * len(xs)) - 1)]

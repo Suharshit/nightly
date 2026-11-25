@@ -72,18 +72,36 @@ def or_query(q: str) -> str:
     return " or ".join(p for p in parts if p.lower() != "or")
 
 
-def keyword_sql(cond: str) -> str:
-    return f"""
-select j.id from jobs j, websearch_to_tsquery('english', %(tsq)s) q
-where {cond} and j.tsv @@ q
-order by ts_rank_cd(j.tsv, q) desc, j.id limit %(k)s"""
+# Both retrievers and the job details in one round trip: the API host and Supabase are far
+# apart, so three queries cost ~3x the network latency. Ranks are 1-based; RRF is in Python.
+KEYWORD_CTE = """kw as (
+  select id, row_number() over (order by rank desc, id) as r from (
+    select j.id, ts_rank_cd(j.tsv, q) as rank
+    from jobs j, websearch_to_tsquery('english', %(tsq)s) q
+    where {cond} and j.tsv @@ q
+    order by rank desc, j.id limit %(k)s) s)"""
+
+VECTOR_CTE = """vec as (
+  select id, row_number() over (order by d, id) as r from (
+    select j.id, j.embedding <=> %(qvec)s::vector as d from jobs j
+    where {cond} and j.embedding is not null
+    order by d, j.id limit %(k)s) s)"""
+
+EMPTY_CTE = "{name} as (select null::bigint as id, null::bigint as r where false)"
+
+CANDIDATES = """with {kw}, {vec}
+select j.id, j.title, c.name as company, j.city, j.work_mode, j.remote, j.seniority,
+       j.min_exp_years, j.max_exp_years, j.skills, j.apply_url, j.posted_at,
+       left(j.description_text, 600) as snippet, kw.r as keyword_rank, vec.r as vector_rank
+from jobs j join companies c on c.id = j.company_id
+left join kw on kw.id = j.id left join vec on vec.id = j.id
+where kw.id is not null or vec.id is not null"""
 
 
-def vector_sql(cond: str) -> str:
-    return f"""
-select j.id from jobs j
-where {cond} and j.embedding is not null
-order by j.embedding <=> %(qvec)s::vector, j.id limit %(k)s"""
+def candidates_sql(cond: str, use_keyword: bool, use_vector: bool) -> str:
+    kw = KEYWORD_CTE.format(cond=cond) if use_keyword else EMPTY_CTE.format(name="kw")
+    vec = VECTOR_CTE.format(cond=cond) if use_vector else EMPTY_CTE.format(name="vec")
+    return CANDIDATES.format(kw=kw, vec=vec)
 
 
 def rrf(*ranked: list[int], k: int = RRF_K) -> list[tuple[int, float]]:
@@ -96,34 +114,20 @@ def rrf(*ranked: list[int], k: int = RRF_K) -> list[tuple[int, float]]:
     return sorted(scores.items(), key=lambda kv: -kv[1])
 
 
-DETAILS = """
-select j.id, j.title, c.name as company, j.city, j.work_mode, j.remote, j.seniority,
-       j.min_exp_years, j.max_exp_years, j.skills, j.apply_url, j.posted_at
-from jobs j join companies c on c.id = j.company_id
-where j.id = any(%(ids)s)"""
-
-
 def search(cur, q: str, qvec: str | None, f: Filters, *, use_keyword: bool = True,
            use_vector: bool = True, limit: int = FUSED) -> list[dict]:
     """Returns up to `limit` jobs, best first, each with its fused score and both ranks."""
-    cond, params = where(f)
-    params["k"] = PER_RETRIEVER
-    kw: list[int] = []
-    vec: list[int] = []
-    if use_keyword and q.strip():
-        cur.execute(keyword_sql(cond), params | {"tsq": or_query(q)})
-        kw = [r[0] for r in cur.fetchall()]
-    if use_vector and qvec is not None:
-        cur.execute(vector_sql(cond), params | {"qvec": qvec})
-        vec = [r[0] for r in cur.fetchall()]
-    fused = rrf(kw, vec)[:limit]
-    if not fused:
+    use_keyword = use_keyword and bool(q.strip())
+    use_vector = use_vector and qvec is not None
+    if not (use_keyword or use_vector):
         return []
-    cur.execute(DETAILS, {"ids": [d for d, _ in fused]})
+    cond, params = where(f)
+    params |= {"k": PER_RETRIEVER, "tsq": or_query(q), "qvec": qvec}
+    cur.execute(candidates_sql(cond, use_keyword, use_vector), params)
     cols = [c.name for c in cur.description]
     rows = {r[0]: dict(zip(cols, r, strict=True)) for r in cur.fetchall()}
-    kw_rank = {d: i for i, d in enumerate(kw, 1)}
-    vec_rank = {d: i for i, d in enumerate(vec, 1)}
-    return [rows[d] | {"score": round(s, 5), "keyword_rank": kw_rank.get(d),
-                       "vector_rank": vec_rank.get(d)}
-            for d, s in fused if d in rows]
+    kw = sorted((d for d in rows if rows[d]["keyword_rank"]),
+                key=lambda d: rows[d]["keyword_rank"])
+    vec = sorted((d for d in rows if rows[d]["vector_rank"]),
+                 key=lambda d: rows[d]["vector_rank"])
+    return [rows[d] | {"score": round(s, 5)} for d, s in rrf(kw, vec)[:limit]]
