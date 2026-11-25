@@ -10,7 +10,8 @@ from pydantic import BaseModel
 
 from api.app.auth import current_user
 from api.app.resume import MAX_BYTES, ResumeError, embed_text, pdf_text, resume_skills
-from api.app.search.hybrid import Filters, infer_level, search
+from api.app.search.hybrid import FUSED, Filters, infer_level, search
+from api.app.search.rerank import rerank as rerank_jobs
 
 
 def to_pgvector(vec: list[float]) -> str:
@@ -19,13 +20,16 @@ def to_pgvector(vec: list[float]) -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Tests set these first, with a fake embedder and their own pool.
+    # Tests set these first, with fake models and their own pool.
     if not hasattr(app.state, "pool"):
         from api.app.db import make_pool
         app.state.pool = make_pool()
     if not hasattr(app.state, "embedder"):
         from api.app.models import Embedder
         app.state.embedder = Embedder()
+    if not hasattr(app.state, "reranker"):
+        from api.app.models import Reranker
+        app.state.reranker = Reranker()
     if not hasattr(app.state, "auth"):
         from api.app.auth import SupabaseAuth
         app.state.auth = SupabaseAuth()
@@ -52,6 +56,7 @@ class Job(BaseModel):
     score: float
     keyword_rank: int | None
     vector_rank: int | None
+    rerank_score: float | None = None
 
 
 class Matches(BaseModel):
@@ -79,13 +84,18 @@ def matches(
     limit: Annotated[int, Query(ge=1, le=30)] = 20,
     keyword: bool = True,
     vector: bool = True,
+    rerank: bool = True,
 ) -> Matches:
     started = time.perf_counter()
     level = level or infer_level(q)
     qvec = to_pgvector(request.app.state.embedder.query(q)) if vector else None
     f = Filters(level=level, cities=city or [], remote=remote)
     with request.app.state.pool.connection() as conn, conn.cursor() as cur:
-        jobs = search(cur, q, qvec, f, use_keyword=keyword, use_vector=vector, limit=limit)
+        # The reranker always sees the full fused top 30, whatever the page size.
+        jobs = search(cur, q, qvec, f, use_keyword=keyword, use_vector=vector,
+                      limit=FUSED if rerank else limit)
+    if rerank:
+        jobs = rerank_jobs(request.app.state.reranker, q, jobs)[:limit]
     took = int((time.perf_counter() - started) * 1000)
     return Matches(q=q, level=level, count=len(jobs), took_ms=took,
                    jobs=[Job(**j) for j in jobs])
