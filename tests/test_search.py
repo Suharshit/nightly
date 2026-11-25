@@ -6,8 +6,7 @@ The query vector is written by hand, so no model is loaded.
 
 import pytest
 
-from api.app import main
-from api.app.search import hybrid
+from api.app.search import hybrid, pipeline
 from worker import ingest
 from worker.embed import DIM, to_pgvector
 
@@ -109,7 +108,7 @@ def client(api, monkeypatch):
                  "apply_url": "https://example.com/1", "posted_at": None, "score": 0.03,
                  "keyword_rank": 1, "vector_rank": 2}]
 
-    monkeypatch.setattr(main, "search", fake_search)
+    monkeypatch.setattr(pipeline, "search", fake_search)
     return c, seen
 
 
@@ -126,6 +125,6 @@ def test_matches_infers_level_and_passes_filters(client):
 
 def test_matches_validates_input(client):
     c, _ = client
-    assert c.get("/matches", params={"q": ""}).status_code == 422
+    assert c.get("/matches", params={"q": ""}).status_code == 400  # no query, no resume
     assert c.get("/matches", params={"q": "go", "level": "senior"}).status_code == 422
     assert c.get("/health").json() == {"ok": True}

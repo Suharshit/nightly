@@ -19,3 +19,5 @@
 
 - Done: cross-encoder reranker (ms-marco-MiniLM-L-6-v2) on the fused top 30, switchable with rerank=false. Search now runs as one SQL round trip. scripts/time_matches.py against Supabase from the laptop, warm: rerank on p50 836 / p95 924 ms; rerank off p50 128 / p95 142 ms (was p95 474 with three queries).
 - Broken: for "frontend react intern" only one result is relevant; the index has few frontend internships, so the rest are weak whatever the order.
+- Done: personalisation (brief weights: rerank 1.0, taste 0.3, skill Jaccard 0.2, freshness 0.1, dislike penalty −0.5), max 2 per company in any 5, data-built reasons, query-less feed from the resume, POST /feedback (like moves taste 20%, dislike reasons become avoid rules), PATCH /prefs, shown logging and exclusions. Local check with a throwaway user: one like took the liked job from 0.12 to 0.42 and the disliked job left the feed. Anonymous /matches on Supabase: p50 840 / p95 1080 ms.
+- Broken: signed-in timing on Supabase not measured (needs a real Supabase user, so the web app). A job shown 3 times is hidden, so 3 feed refreshes rotate the top matches; revisit once real users try it.

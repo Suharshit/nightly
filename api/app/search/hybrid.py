@@ -92,7 +92,10 @@ EMPTY_CTE = "{name} as (select null::bigint as id, null::bigint as r where false
 CANDIDATES = """with {kw}, {vec}
 select j.id, j.title, c.name as company, j.city, j.work_mode, j.remote, j.seniority,
        j.min_exp_years, j.max_exp_years, j.skills, j.apply_url, j.posted_at,
-       left(j.description_text, 600) as snippet, kw.r as keyword_rank, vec.r as vector_rank
+       left(j.description_text, 600) as snippet, kw.r as keyword_rank, vec.r as vector_rank,
+       j.company_id, coalesce(j.posted_at, j.first_seen) as seen_at,
+       case when %(taste)s::vector is null then null
+            else 1 - (j.embedding <=> %(taste)s::vector) end as taste_sim
 from jobs j join companies c on c.id = j.company_id
 left join kw on kw.id = j.id left join vec on vec.id = j.id
 where kw.id is not null or vec.id is not null"""
@@ -115,14 +118,14 @@ def rrf(*ranked: list[int], k: int = RRF_K) -> list[tuple[int, float]]:
 
 
 def search(cur, q: str, qvec: str | None, f: Filters, *, use_keyword: bool = True,
-           use_vector: bool = True, limit: int = FUSED) -> list[dict]:
+           use_vector: bool = True, limit: int = FUSED, taste: str | None = None) -> list[dict]:
     """Returns up to `limit` jobs, best first, each with its fused score and both ranks."""
     use_keyword = use_keyword and bool(q.strip())
     use_vector = use_vector and qvec is not None
     if not (use_keyword or use_vector):
         return []
     cond, params = where(f)
-    params |= {"k": PER_RETRIEVER, "tsq": or_query(q), "qvec": qvec}
+    params |= {"k": PER_RETRIEVER, "tsq": or_query(q), "qvec": qvec, "taste": taste}
     cur.execute(candidates_sql(cond, use_keyword, use_vector), params)
     cols = [c.name for c in cur.description]
     rows = {r[0]: dict(zip(cols, r, strict=True)) for r in cur.fetchall()}
