@@ -24,4 +24,5 @@ class JobIn(BaseModel):
     apply_url: str | None = None
     posted_at: datetime | None = None
     salary_raw: str | None = None
+    employment_type: str | None = None  # full_time | part_time | intern | contract | temporary
     india_ok: bool = Field(False, description="located in India, or remote and open to India")

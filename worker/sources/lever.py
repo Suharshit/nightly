@@ -13,6 +13,10 @@ from worker.text import find_city, html_to_text, india_ok
 
 SOURCE = "lever"
 _MODES = {"on-site": "onsite", "onsite": "onsite", "remote": "remote", "hybrid": "hybrid"}
+_COMMITMENT = {"full time": "full_time", "full-time": "full_time", "fulltime": "full_time",
+               "permanent": "full_time", "part time": "part_time", "part-time": "part_time",
+               "intern": "intern", "internship": "intern", "contract": "contract",
+               "contractor": "contract", "temporary": "temporary", "fixed term": "contract"}
 
 
 def url(slug: str) -> str:
@@ -53,6 +57,7 @@ def parse(data: list, company: str) -> list[JobIn]:
             apply_url=p.get("hostedUrl") or p.get("applyUrl"),
             posted_at=datetime.fromtimestamp(created / 1000, tz=UTC) if created else None,
             salary_raw=_salary(p),
+            employment_type=_COMMITMENT.get((cats.get("commitment") or "").strip().lower()),
             india_ok=india_ok(locs, remote, p.get("country")),
         ))
     return jobs

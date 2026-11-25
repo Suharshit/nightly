@@ -35,6 +35,6 @@ jobs:
       - name: Apply schema
         run: |
           psql -h localhost -U nightly -d nightly -v ON_ERROR_STOP=1 -f db/local/000_auth_stub.sql
-          psql -h localhost -U nightly -d nightly -v ON_ERROR_STOP=1 -f db/migrations/001_init.sql
+          for f in db/migrations/*.sql; do psql -h localhost -U nightly -d nightly -v ON_ERROR_STOP=1 -f "$f"; done
       - run: ruff check .
       - run: pytest -q -rs

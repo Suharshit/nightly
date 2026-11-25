@@ -92,11 +92,11 @@ def upsert_companies(cur, companies: list[Company]) -> None:
 
 UPSERT = """
 insert into jobs (company_id, source, external_id, title, location_raw, remote, city, work_mode,
-                  description_text, apply_url, posted_at, salary_raw, content_hash, last_seen,
-                  is_active)
+                  description_text, apply_url, posted_at, salary_raw, employment_type,
+                  content_hash, last_seen, is_active)
 values (%(company_id)s, %(source)s, %(external_id)s, %(title)s, %(location_raw)s, %(remote)s,
         %(city)s, %(work_mode)s, %(description_text)s, %(apply_url)s, %(posted_at)s,
-        %(salary_raw)s, %(content_hash)s, now(), true)
+        %(salary_raw)s, %(employment_type)s, %(content_hash)s, now(), true)
 on conflict (source, external_id) do update set
   company_id = excluded.company_id,
   title = excluded.title,
@@ -108,6 +108,7 @@ on conflict (source, external_id) do update set
   apply_url = excluded.apply_url,
   posted_at = coalesce(excluded.posted_at, jobs.posted_at),
   salary_raw = excluded.salary_raw,
+  employment_type = coalesce(excluded.employment_type, jobs.employment_type),
   last_seen = now(),
   is_active = true,
   -- changed-only work: a new hash queues re-extraction and re-embedding
