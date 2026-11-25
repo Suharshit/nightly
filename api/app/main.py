@@ -8,14 +8,11 @@ from typing import Annotated, Literal
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, UploadFile
 from pydantic import BaseModel
 
-from api.app.auth import current_user
+from api.app import profile as prof
+from api.app.auth import current_user, optional_user
 from api.app.resume import MAX_BYTES, ResumeError, embed_text, pdf_text, resume_skills
-from api.app.search.hybrid import FUSED, Filters, infer_level, search
-from api.app.search.rerank import rerank as rerank_jobs
-
-
-def to_pgvector(vec: list[float]) -> str:
-    return "[" + ",".join(f"{x:.6f}" for x in vec) + "]"
+from api.app.search import pipeline
+from api.app.search.pipeline import to_pgvector
 
 
 @asynccontextmanager
@@ -53,15 +50,20 @@ class Job(BaseModel):
     skills: list[str]
     apply_url: str | None
     posted_at: datetime | None
-    score: float
+    reason: str
+    final_score: float
+    score: float                       # fused (RRF)
     keyword_rank: int | None
     vector_rank: int | None
     rerank_score: float | None = None
+    parts: dict[str, float]            # taste, skills, fresh, penalty: for debugging and evals
 
 
 class Matches(BaseModel):
     q: str
+    mode: str
     level: str | None
+    personalised: bool
     count: int
     took_ms: int
     jobs: list[Job]
@@ -77,7 +79,8 @@ def health(request: Request) -> dict:
 @app.get("/matches", response_model=Matches)
 def matches(
     request: Request,
-    q: Annotated[str, Query(min_length=1, max_length=200)],
+    user: Annotated[dict | None, Depends(optional_user)],
+    q: Annotated[str, Query(max_length=200)] = "",
     level: Literal["student", "fresher", "junior"] | None = None,
     city: Annotated[list[str] | None, Query()] = None,
     remote: bool = False,
@@ -85,20 +88,63 @@ def matches(
     keyword: bool = True,
     vector: bool = True,
     rerank: bool = True,
+    personalise: bool = True,
 ) -> Matches:
+    """With q: search. Without q (signed in, resume uploaded): the personal feed."""
     started = time.perf_counter()
-    level = level or infer_level(q)
-    qvec = to_pgvector(request.app.state.embedder.query(q)) if vector else None
-    f = Filters(level=level, cities=city or [], remote=remote)
-    with request.app.state.pool.connection() as conn, conn.cursor() as cur:
-        # The reranker always sees the full fused top 30, whatever the page size.
-        jobs = search(cur, q, qvec, f, use_keyword=keyword, use_vector=vector,
-                      limit=FUSED if rerank else limit)
-    if rerank:
-        jobs = rerank_jobs(request.app.state.reranker, q, jobs)[:limit]
+    req = pipeline.Request(q=q, level=level, cities=city or [], remote=remote, limit=limit,
+                           use_keyword=keyword, use_vector=vector, use_rerank=rerank,
+                           use_profile=personalise)
+    st = request.app.state
+    try:
+        res = pipeline.run(st.pool, st.embedder, st.reranker, req, user)
+    except pipeline.NeedsQuery as e:
+        raise HTTPException(400, str(e)) from e
     took = int((time.perf_counter() - started) * 1000)
-    return Matches(q=q, level=level, count=len(jobs), took_ms=took,
-                   jobs=[Job(**j) for j in jobs])
+    return Matches(q=q, mode=res.mode, level=res.level,
+                   personalised=bool(user) and personalise, count=len(res.jobs),
+                   took_ms=took, jobs=[Job(**j) for j in res.jobs])
+
+
+class Feedback(BaseModel):
+    job_id: int
+    action: Literal["like", "dislike", "apply_click", "share"]
+    reason: Literal["too_senior", "wrong_location", "not_interested"] | None = None
+
+
+@app.post("/feedback")
+def feedback(request: Request, body: Feedback,
+             user: Annotated[dict, Depends(current_user)]) -> dict:
+    # One transaction: the interaction and the taste/avoid update land together or not at all.
+    with request.app.state.pool.connection() as conn, conn.transaction():
+        try:
+            with conn.cursor() as cur:
+                changed = prof.record_feedback(cur, user, body.job_id, body.action,
+                                               body.reason)
+        except LookupError as e:
+            raise HTTPException(404, "That job no longer exists.") from e
+        except ValueError as e:
+            raise HTTPException(422, str(e)) from e
+    return {"ok": True, "changed": changed}
+
+
+class Prefs(BaseModel):
+    roles: list[str] | None = None
+    cities: list[str] | None = None
+    remote: bool | None = None
+    level: Literal["student", "fresher", "junior"] | None = None
+
+
+@app.patch("/prefs")
+def set_prefs(request: Request, body: Prefs,
+              user: Annotated[dict, Depends(current_user)]) -> dict:
+    """Onboarding chips: role type, location, experience. Only the fields sent change."""
+    patch = body.model_dump(exclude_unset=True)
+    with request.app.state.pool.connection() as conn, conn.cursor() as cur:
+        try:
+            return {"prefs": prof.update_prefs(cur, user, patch)}
+        except ValueError as e:
+            raise HTTPException(422, str(e)) from e
 
 
 SAVE_RESUME = """

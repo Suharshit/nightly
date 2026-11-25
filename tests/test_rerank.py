@@ -3,7 +3,7 @@
 import pytest
 
 from api.app import main
-from api.app.search import rerank
+from api.app.search import pipeline, rerank
 from api.app.search.hybrid import FUSED
 from tests.conftest import FakeReranker
 
@@ -45,7 +45,7 @@ def seen(api, monkeypatch):
         calls.update(kw)
         return fused[:kw["limit"]]
 
-    monkeypatch.setattr(main, "search", fake_search)
+    monkeypatch.setattr(pipeline, "search", fake_search)
     return api[0], calls
 
 
@@ -61,5 +61,5 @@ def test_matches_rerank_can_be_switched_off(seen):
     c, calls = seen
     body = c.get("/matches", params={"q": "frontend react intern", "limit": 1,
                                      "rerank": "false"}).json()
-    assert calls["limit"] == 1
+    assert calls["limit"] == FUSED
     assert [j["id"] for j in body["jobs"]] == [1] and body["jobs"][0]["rerank_score"] is None

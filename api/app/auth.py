@@ -62,3 +62,10 @@ def current_user(request: Request) -> dict:
     if scheme.lower() != "bearer" or not token:
         raise HTTPException(401, "Sign in first.")
     return request.app.state.auth.user(token)
+
+
+def optional_user(request: Request) -> dict | None:
+    """Signed-in user, or None for anonymous calls. A bad token is still an error."""
+    if not request.headers.get("authorization"):
+        return None
+    return current_user(request)
