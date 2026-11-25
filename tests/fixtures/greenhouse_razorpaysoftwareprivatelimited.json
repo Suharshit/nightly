@@ -1,0 +1,490 @@
+{
+ "jobs": [
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited/jobs/4741226005",
+   "data_compliance": [
+    {
+     "type": "gdpr",
+     "requires_consent": false,
+     "requires_processing_consent": false,
+     "requires_retention_consent": false,
+     "retention_period": null,
+     "demographic_data_consent_applies": false
+    }
+   ],
+   "employment": "employment_required",
+   "internal_job_id": 4458143005,
+   "location": {
+    "name": "Chennai"
+   },
+   "metadata": [
+    {
+     "id": 4731492005,
+     "name": "Job Location",
+     "value": [
+      "Chennai"
+     ],
+     "value_type": "multi_select"
+    },
+    {
+     "id": 9708137005,
+     "name": "Job Location ( Base Location )",
+     "value": "Bengaluru",
+     "value_type": "single_select"
+    }
+   ],
+   "id": 4741226005,
+   "updated_at": "2026-10-09T04:59:36-04:00",
+   "requisition_id": "14807",
+   "title": "Analyst, Banking Alliances",
+   "company_name": "Razorpay Software Private Limited",
+   "first_published": "2026-10-08T09:10:53-04:00",
+   "language": "en",
+   "application_deadline": null,
+   "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;Razorpay is one of India’s leading full-stack financial technology companies, powering the way businesses move, manage, and grow money. Founded in 2014 by Harshil Mathur and Shashank Kumar with a simple vision - to simplify payments for Indian businesses - we’ve since grown into a fintech powerhouse driving India’s digital payment revolution.&lt;/p&gt;\n&lt;p&gt;Razorpay powers millions of businesses with a smarter, scalable stack that goes beyond transactions to help them truly build and grow.&lt;/p&gt;\n&lt;p&gt;From building AI-native agentic payments, to AI-assisted fraud detection and real-time risk intelligence to automated reconciliation, smart payouts, and predictive financial insights, we are embedding intelligence across our stack to make money movement faster, safer, and more efficient. In close collaboration with ecosystem partners - including banks, networks, regulators - we are pioneering industry-first solutions that are shaping the next era of fintech&lt;/p&gt;\n&lt;p&gt;Across India, Singapore and Malaysia, our products span everything from seamless checkouts to payroll automation - powering a fintech ecosystem that’s redefining how money moves across Asia.&lt;/p&gt;\n&lt;p&gt;Today, that ecosystem supports everyone from early-stage startups to some of India’s largest enterprises, enabling them to accept, process, and disburse payments at scale while expanding into new ways of managing money more efficiently.&lt;/p&gt;\n&lt;p&gt;Our scale speaks volumes: Razorpay processes $180+ billion in annualized transactions, powering leading businesses like Airbnb, Facebook, WhatsApp, Airtel, CRED, BookmyShow, Zomato, Swiggy, Lenskart, Mirae Asset Capital markets, Indian Oil, National Pension Scheme - and over 100 of India’s unicorns. With strong roots in India and growing operations in Southeast Asia, we are shaping the next chapter of financial technology across the region.&lt;/p&gt;\n&lt;p&gt;We are backed by global investors including GIC, Peak XV Partners (formerly Sequoia Capital India &amp;amp; SEA), Tiger Global, Ribbit Capital, Matrix Partners, MasterCard, and Salesforce Ventures, having raised over $740 million to date. Strategic acquisitions - including Ezetap (POS and offline payments), Curlec (Malaysia expansion), BillMe (digital invoicing), and POP (rewards-first UPI) - along with earlier moves in fraud prevention, payroll, and lending, have further strengthened our platform and widened our footprint across Asia.&lt;/p&gt;\n&lt;p&gt;But what truly sets Razorpay apart is our culture. At Razorpay, ownership is our oxygen - you own what you build, with no micromanagement or red tape, just the runway to make your ideas fly. Learning is a lifestyle - if you’re curious, you’ll feel at home here. People &amp;gt; Pedigree - we hire for attitude, hustle, and hunger more than degrees. Transparency thrives over titles - this is where interns question CXOs and CXOs say “thank you.” Guided by ou",
+   "departments": [
+    {
+     "id": 4021994005,
+     "name": "Banking Alliances",
+     "child_ids": [],
+     "parent_id": 4021993005
+    }
+   ],
+   "offices": [
+    {
+     "id": 4009555005,
+     "name": "Payments",
+     "location": null,
+     "child_ids": [],
+     "parent_id": null
+    }
+   ],
+   "ai_disclaimer": null,
+   "include_ai_disclaimer": null,
+   "ai_opt_out_request_url": null
+  },
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited/jobs/4753866005",
+   "data_compliance": [
+    {
+     "type": "gdpr",
+     "requires_consent": false,
+     "requires_processing_consent": false,
+     "requires_retention_consent": false,
+     "retention_period": null,
+     "demographic_data_consent_applies": false
+    }
+   ],
+   "employment": "employment_required",
+   "internal_job_id": 4463611005,
+   "location": {
+    "name": "Bengaluru"
+   },
+   "metadata": [
+    {
+     "id": 4731492005,
+     "name": "Job Location",
+     "value": [
+      "Bengaluru"
+     ],
+     "value_type": "multi_select"
+    },
+    {
+     "id": 9708137005,
+     "name": "Job Location ( Base Location )",
+     "value": "Bengaluru",
+     "value_type": "single_select"
+    }
+   ],
+   "id": 4753866005,
+   "updated_at": "2026-11-19T04:43:26-05:00",
+   "requisition_id": "14957",
+   "title": "Associate Director, Risk Management ",
+   "company_name": "Razorpay Software Private Limited",
+   "first_published": "2026-11-19T04:43:26-05:00",
+   "language": "en",
+   "application_deadline": null,
+   "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;Razorpay is one of India’s leading full-stack financial technology companies, powering the way businesses move, manage, and grow money. Founded in 2014 by Harshil Mathur and Shashank Kumar with a simple vision - to simplify payments for Indian businesses - we’ve since grown into a fintech powerhouse driving India’s digital payment revolution.&lt;/p&gt;\n&lt;p&gt;Razorpay powers millions of businesses with a smarter, scalable stack that goes beyond transactions to help them truly build and grow.&lt;/p&gt;\n&lt;p&gt;From building AI-native agentic payments, to AI-assisted fraud detection and real-time risk intelligence to automated reconciliation, smart payouts, and predictive financial insights, we are embedding intelligence across our stack to make money movement faster, safer, and more efficient. In close collaboration with ecosystem partners - including banks, networks, regulators - we are pioneering industry-first solutions that are shaping the next era of fintech&lt;/p&gt;\n&lt;p&gt;Across India, Singapore and Malaysia, our products span everything from seamless checkouts to payroll automation - powering a fintech ecosystem that’s redefining how money moves across Asia.&lt;/p&gt;\n&lt;p&gt;Today, that ecosystem supports everyone from early-stage startups to some of India’s largest enterprises, enabling them to accept, process, and disburse payments at scale while expanding into new ways of managing money more efficiently.&lt;/p&gt;\n&lt;p&gt;Our scale speaks volumes: Razorpay processes $180+ billion in annualized transactions, powering leading businesses like Airbnb, Facebook, WhatsApp, Airtel, CRED, BookmyShow, Zomato, Swiggy, Lenskart, Mirae Asset Capital markets, Indian Oil, National Pension Scheme - and over 100 of India’s unicorns. With strong roots in India and growing operations in Southeast Asia, we are shaping the next chapter of financial technology across the region.&lt;/p&gt;\n&lt;p&gt;We are backed by global investors including GIC, Peak XV Partners (formerly Sequoia Capital India &amp;amp; SEA), Tiger Global, Ribbit Capital, Matrix Partners, MasterCard, and Salesforce Ventures, having raised over $740 million to date. Strategic acquisitions - including Ezetap (POS and offline payments), Curlec (Malaysia expansion), BillMe (digital invoicing), and POP (rewards-first UPI) - along with earlier moves in fraud prevention, payroll, and lending, have further strengthened our platform and widened our footprint across Asia.&lt;/p&gt;\n&lt;p&gt;But what truly sets Razorpay apart is our culture. At Razorpay, ownership is our oxygen - you own what you build, with no micromanagement or red tape, just the runway to make your ideas fly. Learning is a lifestyle - if you’re curious, you’ll feel at home here. People &amp;gt; Pedigree - we hire for attitude, hustle, and hunger more than degrees. Transparency thrives over titles - this is where interns question CXOs and CXOs say “thank you.” Guided by ou",
+   "departments": [
+    {
+     "id": 4021992005,
+     "name": "Business",
+     "child_ids": [
+      4024743005,
+      4135081005,
+      4134248005,
+      4038759005,
+      4038484005,
+      4040706005,
+      4024737005,
+      4130660005,
+      4141485005,
+      4135090005,
+      4130661005,
+      4024739005,
+      4135159005,
+      4141487005,
+      4135162005,
+      4135164005,
+      4145118005,
+      4145123005,
+      4029702005,
+      4044868005,
+      4044878005,
+      4044879005,
+      4021999005,
+      4144767005,
+      4021993005,
+      4024744005,
+      4024750005,
+      4024751005,
+      4024758005,
+      4024757005,
+      4024763005,
+      4024764005,
+      4024776005,
+      4024779005,
+      4024782005,
+      4024793005,
+      4024785005,
+      4024791005,
+      4024800005,
+      4039244005,
+      4037907005,
+      4145107005,
+      4135155005,
+      4135082005,
+      4135083005,
+      4135084005,
+      4135089005,
+      4135085005,
+      4135086005,
+      4135088005,
+      4135087005,
+      4134249005,
+      4134250005,
+      4038760005,
+      4024792005,
+      4141486005,
+      4135156005,
+      4135157005,
+      4135158005,
+      4024740005,
+      4024741005,
+      4135161005,
+      4135160005,
+      4135163005,
+      4135165005,
+      4145119005,
+      4145120005,
+      4145121005,
+      4145122005,
+      4145125005,
+      4145124005,
+      4044869005,
+      4044870005,
+      4044871005,
+      4044872005,
+      4044873005,
+      4044877005,
+      4135380005,
+      4044885005,
+      4044880005,
+      4044881005,
+      4044882005,
+      4044884005,
+      4044883005,
+      4044886005,
+      4134564005,
+      4040798005,
+      4022001005,
+      4022000005,
+      4030804005,
+      4038260005,
+      4036710005,
+      4030802005,
+      4022003005,
+      4038588005,
+      4145134005,
+      4145130005,
+      4145127005,
+      4145132005,
+      4145126005,
+      4145128005,
+      4145129005,
+      4145131005,
+      4145133005,
+      4145135005,
+      4144768005,
+      4145136005,
+      4145138005,
+      4145137005,
+      4145139005,
+      4147065005,
+      4021994005,
+      4021995005,
+      4021996005,
+      4021997005,
+      4021998005,
+      4134236005,
+      4134237005,
+      4145471005,
+      4134240005,
+      4024747005,
+      4137275005,
+      4024745005,
+      4024746005,
+      4024748005,
+      4024749005,
+      4135077005,
+      4134554005,
+      4135166005,
+      4024742005,
+      4130657005,
+      4130658005,
+      4040797005,
+      4130659005,
+      4024752005,
+      4024753005,
+      4024754005,
+      4024755005,
+      4024756005,
+      4024760005,
+      4024759005,
+      4024761005,
+      4024762005,
+      4134241005,
+      4024767005,
+      4024771005,
+      4024773005,
+      4024765005,
+      4024772005,
+      4024766005,
+      4024769005,
+      4024768005,
+      4024770005,
+      4024774005,
+      4024775005,
+      4149360005,
+      4024777005,
+      4024778005,
+      4024781005,
+      4024780005,
+      4145884005,
+      4039845005,
+      4134246005,
+      4024783005,
+      4024784005,
+      4024794005,
+      4024795005,
+      4024797005,
+      4024796005,
+      4024798005,
+      4024799005,
+      4035817005,
+      4024787005,
+      4024786005,
+      4024788005,
+      4024789005,
+      4024790005,
+      4042579005,
+      4135368005,
+      4135369005,
+      4184627005,
+      4135170005,
+      4041328005,
+      4041329005,
+      4129870005,
+      4134242005,
+      4134244005,
+      4134247005,
+      4132428005,
+      4039245005,
+      4134251005,
+      4145116005,
+      4145113005,
+      4145114005,
+      4145117005,
+      4145108005,
+      4145109005,
+      4145115005,
+      4145110005,
+      4145112005,
+      4145111005,
+      4145401005
+     ],
+     "parent_id": null
+    }
+   ],
+   "offices": [
+    {
+     "id": 4009555005,
+     "name": "Payments",
+     "location": null,
+     "child_ids": [],
+     "parent_id": null
+    }
+   ],
+   "ai_disclaimer": null,
+   "include_ai_disclaimer": null,
+   "ai_opt_out_request_url": null
+  },
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited/jobs/4694487005",
+   "data_compliance": [
+    {
+     "type": "gdpr",
+     "requires_consent": false,
+     "requires_processing_consent": false,
+     "requires_retention_consent": false,
+     "retention_period": null,
+     "demographic_data_consent_applies": false
+    }
+   ],
+   "employment": "employment_required",
+   "internal_job_id": 4435341005,
+   "location": {
+    "name": "Bengaluru"
+   },
+   "metadata": [
+    {
+     "id": 4731492005,
+     "name": "Job Location",
+     "value": [
+      "Bengaluru"
+     ],
+     "value_type": "multi_select"
+    },
+    {
+     "id": 9708137005,
+     "name": "Job Location ( Base Location )",
+     "value": "Bengaluru",
+     "value_type": "single_select"
+    }
+   ],
+   "id": 4694487005,
+   "updated_at": "2026-11-09T09:17:52-05:00",
+   "requisition_id": "14161",
+   "title": "Associate Manager, AEO",
+   "company_name": "Razorpay Software Private Limited",
+   "first_published": "2026-05-12T07:30:40-04:00",
+   "language": "en",
+   "application_deadline": null,
+   "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;Razorpay is one of India’s leading full-stack financial technology companies, powering the way businesses move, manage, and grow money. Founded in 2014 by Harshil Mathur and Shashank Kumar with a simple vision - to simplify payments for Indian businesses - we’ve since grown into a fintech powerhouse driving India’s digital payment revolution.&lt;/p&gt;\n&lt;p&gt;Razorpay powers millions of businesses with a smarter, scalable stack that goes beyond transactions to help them truly build and grow.&lt;/p&gt;\n&lt;p&gt;From building AI-native agentic payments, to AI-assisted fraud detection and real-time risk intelligence to automated reconciliation, smart payouts, and predictive financial insights, we are embedding intelligence across our stack to make money movement faster, safer, and more efficient. In close collaboration with ecosystem partners - including banks, networks, regulators - we are pioneering industry-first solutions that are shaping the next era of fintech&lt;/p&gt;\n&lt;p&gt;Across India, Singapore and Malaysia, our products span everything from seamless checkouts to payroll automation - powering a fintech ecosystem that’s redefining how money moves across Asia.&lt;/p&gt;\n&lt;p&gt;Today, that ecosystem supports everyone from early-stage startups to some of India’s largest enterprises, enabling them to accept, process, and disburse payments at scale while expanding into new ways of managing money more efficiently.&lt;/p&gt;\n&lt;p&gt;Our scale speaks volumes: Razorpay processes $180+ billion in annualized transactions, powering leading businesses like Airbnb, Facebook, WhatsApp, Airtel, CRED, BookmyShow, Zomato, Swiggy, Lenskart, Mirae Asset Capital markets, Indian Oil, National Pension Scheme - and over 100 of India’s unicorns. With strong roots in India and growing operations in Southeast Asia, we are shaping the next chapter of financial technology across the region.&lt;/p&gt;\n&lt;p&gt;We are backed by global investors including GIC, Peak XV Partners (formerly Sequoia Capital India &amp;amp; SEA), Tiger Global, Ribbit Capital, Matrix Partners, MasterCard, and Salesforce Ventures, having raised over $740 million to date. Strategic acquisitions - including Ezetap (POS and offline payments), Curlec (Malaysia expansion), BillMe (digital invoicing), and POP (rewards-first UPI) - along with earlier moves in fraud prevention, payroll, and lending, have further strengthened our platform and widened our footprint across Asia.&lt;/p&gt;\n&lt;p&gt;But what truly sets Razorpay apart is our culture. At Razorpay, ownership is our oxygen - you own what you build, with no micromanagement or red tape, just the runway to make your ideas fly. Learning is a lifestyle - if you’re curious, you’ll feel at home here. People &amp;gt; Pedigree - we hire for attitude, hustle, and hunger more than degrees. Transparency thrives over titles - this is where interns question CXOs and CXOs say “thank you.” Guided by ou",
+   "departments": [
+    {
+     "id": 4024764005,
+     "name": "Marketing",
+     "child_ids": [
+      4134241005,
+      4024767005,
+      4024771005,
+      4024773005,
+      4024765005,
+      4024772005,
+      4024766005,
+      4024769005,
+      4024768005,
+      4024770005,
+      4024774005,
+      4024775005,
+      4149360005
+     ],
+     "parent_id": 4021992005
+    }
+   ],
+   "offices": [
+    {
+     "id": 4009555005,
+     "name": "Payments",
+     "location": null,
+     "child_ids": [],
+     "parent_id": null
+    }
+   ],
+   "ai_disclaimer": null,
+   "include_ai_disclaimer": null,
+   "ai_opt_out_request_url": null
+  },
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/razorpaysoftwareprivatelimited/jobs/4756321005",
+   "data_compliance": [
+    {
+     "type": "gdpr",
+     "requires_consent": false,
+     "requires_processing_consent": false,
+     "requires_retention_consent": false,
+     "retention_period": null,
+     "demographic_data_consent_applies": false
+    }
+   ],
+   "employment": "employment_required",
+   "internal_job_id": 4464470005,
+   "location": {
+    "name": "Bengaluru"
+   },
+   "metadata": [
+    {
+     "id": 4731492005,
+     "name": "Job Location",
+     "value": [
+      "Bengaluru"
+     ],
+     "value_type": "multi_select"
+    },
+    {
+     "id": 9708137005,
+     "name": "Job Location ( Base Location )",
+     "value": "Bengaluru",
+     "value_type": "single_select"
+    }
+   ],
+   "id": 4756321005,
+   "updated_at": "2026-11-20T04:23:32-05:00",
+   "requisition_id": "14984",
+   "title": "Associate Manager, Emerging Business (Key Accounts)",
+   "company_name": "Razorpay Software Private Limited",
+   "first_published": "2026-11-20T04:12:48-05:00",
+   "language": "en",
+   "application_deadline": null,
+   "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;Razorpay is one of India’s leading full-stack financial technology companies, powering the way businesses move, manage, and grow money. Founded in 2014 by Harshil Mathur and Shashank Kumar with a simple vision - to simplify payments for Indian businesses - we’ve since grown into a fintech powerhouse driving India’s digital payment revolution.&lt;/p&gt;\n&lt;p&gt;Razorpay powers millions of businesses with a smarter, scalable stack that goes beyond transactions to help them truly build and grow.&lt;/p&gt;\n&lt;p&gt;From building AI-native agentic payments, to AI-assisted fraud detection and real-time risk intelligence to automated reconciliation, smart payouts, and predictive financial insights, we are embedding intelligence across our stack to make money movement faster, safer, and more efficient. In close collaboration with ecosystem partners - including banks, networks, regulators - we are pioneering industry-first solutions that are shaping the next era of fintech&lt;/p&gt;\n&lt;p&gt;Across India, Singapore and Malaysia, our products span everything from seamless checkouts to payroll automation - powering a fintech ecosystem that’s redefining how money moves across Asia.&lt;/p&gt;\n&lt;p&gt;Today, that ecosystem supports everyone from early-stage startups to some of India’s largest enterprises, enabling them to accept, process, and disburse payments at scale while expanding into new ways of managing money more efficiently.&lt;/p&gt;\n&lt;p&gt;Our scale speaks volumes: Razorpay processes $180+ billion in annualized transactions, powering leading businesses like Airbnb, Facebook, WhatsApp, Airtel, CRED, BookmyShow, Zomato, Swiggy, Lenskart, Mirae Asset Capital markets, Indian Oil, National Pension Scheme - and over 100 of India’s unicorns. With strong roots in India and growing operations in Southeast Asia, we are shaping the next chapter of financial technology across the region.&lt;/p&gt;\n&lt;p&gt;We are backed by global investors including GIC, Peak XV Partners (formerly Sequoia Capital India &amp;amp; SEA), Tiger Global, Ribbit Capital, Matrix Partners, MasterCard, and Salesforce Ventures, having raised over $740 million to date. Strategic acquisitions - including Ezetap (POS and offline payments), Curlec (Malaysia expansion), BillMe (digital invoicing), and POP (rewards-first UPI) - along with earlier moves in fraud prevention, payroll, and lending, have further strengthened our platform and widened our footprint across Asia.&lt;/p&gt;\n&lt;p&gt;But what truly sets Razorpay apart is our culture. At Razorpay, ownership is our oxygen - you own what you build, with no micromanagement or red tape, just the runway to make your ideas fly. Learning is a lifestyle - if you’re curious, you’ll feel at home here. People &amp;gt; Pedigree - we hire for attitude, hustle, and hunger more than degrees. Transparency thrives over titles - this is where interns question CXOs and CXOs say “thank you.” Guided by ou",
+   "departments": [
+    {
+     "id": 4024764005,
+     "name": "Marketing",
+     "child_ids": [
+      4134241005,
+      4024767005,
+      4024771005,
+      4024773005,
+      4024765005,
+      4024772005,
+      4024766005,
+      4024769005,
+      4024768005,
+      4024770005,
+      4024774005,
+      4024775005,
+      4149360005
+     ],
+     "parent_id": 4021992005
+    }
+   ],
+   "offices": [
+    {
+     "id": 4009555005,
+     "name": "Payments",
+     "location": null,
+     "child_ids": [],
+     "parent_id": null
+    }
+   ],
+   "ai_disclaimer": null,
+   "include_ai_disclaimer": null,
+   "ai_opt_out_request_url": null
+  }
+ ],
+ "meta": {
+  "total": 26
+ }
+}
