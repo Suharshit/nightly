@@ -1,0 +1,330 @@
+# Candidate companies for slug discovery. One per line: Name[|slug1,slug2].
+# Without explicit slugs, discover_slugs.py tries: base, base+"hq", base+"india".
+# Indian startups
+Razorpay|razorpaysoftwareprivatelimited,razorpay
+Groww
+PhonePe
+Meesho
+CRED|cred
+Dream Sports|dreamsports,dream11
+ShareChat|sharechat,mohalla
+Zepto
+Swiggy
+Blinkit
+Unacademy
+Vedantu
+upGrad|upgrad
+Scaler|scaler,interviewbit
+Physics Wallah|physicswallah,pw
+Cars24|cars24
+Spinny
+Ola Electric|olaelectric,ola
+Krutrim
+Rapido
+Porter|porter,theporter
+Delhivery
+Shiprocket
+Nykaa
+Purplle
+Lenskart
+Licious
+Urban Company|urbancompany
+NoBroker|nobroker
+Housing.com|housing
+OYO|oyo,oyorooms
+MakeMyTrip|makemytrip
+ixigo
+Paytm
+MobiKwik|mobikwik
+BharatPe|bharatpe
+Cashfree|cashfree,cashfreepayments
+Juspay
+Setu|setu
+M2P Fintech|m2p,m2pfintech
+Zeta|zeta,zetasuite
+Open|open,openfinancial
+Jupiter|jupiter,jupitermoney
+Fi Money|fi,fimoney,epifi
+Niyo
+slice|slice,sliceit
+OneCard|onecard,fpl
+KreditBee|kreditbee
+Navi|navi,navitech
+Khatabook
+OkCredit|okcredit
+Dukaan
+Vyapar|vyapar,vyaparapp
+Freshworks
+Chargebee
+BrowserStack|browserstack
+Postman|postman,postmanlabs
+Hasura
+Druva
+Innovaccer
+Practo
+PharmEasy|pharmeasy
+Tata 1mg|1mg,tata1mg
+HealthifyMe|healthifyme,healthify
+Cult.fit|cultfit,curefit
+Pristyn Care|pristyncare
+InMobi|inmobi
+Glance|glance,glanceinmobi
+Yellow.ai|yellowai,yellow
+Haptik
+Gupshup
+Exotel
+LeadSquared|leadsquared
+Darwinbox
+Keka|keka,kekahr
+Zluri
+Rocketlane
+Sprinklr
+MoEngage|moengage
+CleverTap|clevertap
+WebEngage|webengage
+Netcore Cloud|netcore,netcorecloud
+Capillary|capillary,capillarytech
+MindTickle|mindtickle
+Whatfix
+Uniphore
+Observe.AI|observeai
+Sarvam AI|sarvam,sarvamai
+Atlan
+Hevo Data|hevodata,hevo
+LambdaTest|lambdatest
+Testsigma
+Appsmith
+ToolJet|tooljet
+SigNoz|signoz
+Last9|last9
+smallcase|smallcase
+Upstox
+Dhan|dhan,raisesecurities
+INDmoney|indmoney
+Jar|jar,jarapp,changejarapp
+FamPay|fampay,famapp
+Kuku FM|kukufm,kuku
+Pocket FM|pocketfm
+Pratilipi
+STAGE|stage,stageott
+Eloelo
+VerSe Innovation|verse,verseinnovation,dailyhunt
+Inshorts
+apna|apna,apnajobs
+Unstop
+Springworks
+Ather Energy|atherenergy,ather
+Yulu|yulu,yulubikes
+Euler Motors|eulermotors
+Skyroot Aerospace|skyroot,skyrootaerospace
+Pixxel
+Digantara
+Zetwerk
+OfBusiness|ofbusiness
+Infra.Market|inframarket
+Moglix
+Udaan|udaan,udaantech
+Jumbotail
+ElasticRun|elasticrun
+DealShare|dealshare
+CityMall|citymall
+Ninjacart
+DeHaat|dehaat
+AgroStar|agrostar
+CropIn|cropin
+ACKO|acko
+Digit Insurance|godigit,digit
+Policybazaar|policybazaar,pbfintech
+Ditto Insurance|ditto,joinditto
+Plum|plum,plumhq
+Onsurity
+Loop Health|loophealth,loop
+Turtlemint
+InsuranceDekho|insurancedekho
+CarDekho|cardekho,girnarsoft
+IndiaMART|indiamart
+Bizongo
+DotPe|dotpe
+Petpooja
+Rebel Foods|rebelfoods
+magicpin
+Pine Labs|pinelabs
+Instamojo
+Rupeek
+Fibe|fibe,earlysalary
+Stashfin
+Kissht
+Freo|freo,moneytap
+Scripbox
+Kuvera
+Leap Scholar|leapscholar,leap
+Leverage Edu|leverageedu
+Yocket
+Cuemath
+Classplus
+Teachmint
+Seekho
+Eruditus|eruditus,emeritus
+Simplilearn
+Great Learning|greatlearning
+Masai School|masaischool,masai
+Newton School|newtonschool
+AlmaBetter|almabetter
+Coding Ninjas|codingninjas
+Airmeet
+Hubilo
+Zoomcar
+BluSmart|blusmart
+Cityflo
+Chalo|chalo,chaloapp
+redBus|redbus
+RentoMojo|rentomojo
+Furlenco
+Pepperfry
+Livspace
+HomeLane|homelane
+Wakefit
+Country Delight|countrydelight
+BlackBuck|blackbuck,blackbuckapp
+Shadowfax|shadowfax
+Xpressbees|xpressbees
+Park+|parkplus
+GoMechanic|gomechanic
+Cashify
+Servify
+Bewakoof
+The Souled Store|thesouledstore
+Snitch
+Fynd|fynd,gofynd
+GlowRoad|glowroad
+Simpl|simpl,getsimpl
+Decentro
+Perfios
+Signzy
+IDfy|idfy
+HyperVerge|hyperverge
+Bureau|bureau,bureauid
+Vahan|vahan,vahanai
+Quantiphi
+Fractal Analytics|fractal,fractalanalytics
+Tiger Analytics|tigeranalytics
+Sigmoid
+ThoughtSpot|thoughtspot
+Mad Street Den|madstreetden,vueai
+Wingify|wingify,vwo
+Icertis
+Zeta Global|zetaglobal
+Ultrahuman
+Even Healthcare|even,evenhealthcare
+Neysa
+Composio
+Dodo Payments|dodopayments
+Nurix AI|nurix,nurixai
+Giva|giva
+Swish|swish,swishclub
+Snabbit
+Slash|slash
+SuperOps|superops,superopsai
+Sprinto
+Scrut Automation|scrut,scrutautomation
+Fyle|fyle
+Atomicwork
+Hypertest
+CodeRabbit|coderabbit
+Plivo
+Kapture CX|kapture,kapturecx
+Gameskraft
+Games24x7|games24x7
+MPL|mpl,mobilepremierleague
+WinZO|winzo
+Zupee
+Nazara
+Lummo|lummo
+Mintoak
+Innoviti
+Credgenics
+Spyne|spyne
+Rephrase.ai|rephrase
+Wiom
+Bijak
+Battery Smart|batterysmart
+Atomberg
+Lohum
+Exponent Energy|exponentenergy,exponent
+Agnikul
+Tracxn
+Inc42|inc42
+Mobavenue
+Quizizz
+Testbook
+Adda247|adda247
+Toppr
+Doubtnut
+Emversity
+Kalvium
+Scaler Academy|scaleracademy
+Zuddl
+Eightfold|eightfold,eightfoldai
+Gojek|gojek,gotogroup
+Rippling
+Stripe
+Coinbase
+Twilio
+Okta
+Databricks
+MongoDB|mongodb
+Confluent
+Harness|harness,harnessinc
+Atlassian
+Cloudflare
+GitLab|gitlab
+Canonical|canonical
+Grafana Labs|grafanalabs
+Elastic|elastic
+Deel|deel
+Remote|remote,remotecom
+Turing|turing
+Toptal|toptal
+Supabase
+PostHog|posthog
+Vercel
+Sourcegraph
+Cal.com|cal,calcom
+n8n
+Airbyte
+Dagster|dagster,dagsterlabs
+Temporal|temporal,temporaltechnologies
+Zapier
+Automattic
+Mozilla
+Wikimedia|wikimedia
+DuckDuckGo|duckduckgo
+Hugging Face|huggingface
+Weights & Biases|wandb
+Replit
+Notion|notion
+Figma
+Linear|linear
+Razorpay Curlec|curlec
+Agoda
+Grab|grab
+Sumo Logic|sumologic
+Nutanix
+Rubrik
+Zscaler
+Cohesity
+Commvault
+Druva Inc|druvainc
+Hashicorp|hashicorp
+Chainalysis
+Kraken|kraken,kraken.com
+Binance
+CoinDCX|coindcx
+CoinSwitch|coinswitch
+Polygon|polygon,polygontechnology
+Push Protocol|push,pushprotocol
+Biconomy
+Router Protocol|routerprotocol
+Instabase
+Zoca
+Sprinklr India|sprinklrindia

@@ -2,10 +2,16 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class JobIn(BaseModel):
+    @field_validator("*", mode="before")
+    @classmethod
+    def _no_nul(cls, v):
+        # Postgres text cannot hold NUL bytes; some boards contain them.
+        return v.replace("\x00", "") if isinstance(v, str) else v
+
     source: str  # greenhouse | lever | ashby
     external_id: str
     company: str
