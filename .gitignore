@@ -13,3 +13,4 @@ hf_cache/
 *.log
 data/raw/
 eval/snapshots/
+data/*.log
