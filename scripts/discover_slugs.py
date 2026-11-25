@@ -3,9 +3,11 @@
 Probes data/candidates.txt against all three APIs (1 req/s per host), keeps boards
 with at least one India/remote-open job, and writes data/companies.csv plus a report.
 
-Usage: python -m scripts.discover_slugs
+Usage: python -m scripts.discover_slugs [--file data/candidates.txt] [--merge]
+--merge adds new boards to the existing companies.csv instead of replacing it.
 """
 
+import argparse
 import asyncio
 import csv
 import re
@@ -19,9 +21,9 @@ ADAPTERS = {"greenhouse": greenhouse, "lever": lever, "ashby": ashby}
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def candidates() -> list[tuple[str, list[str]]]:
+def candidates(path: Path) -> list[tuple[str, list[str]]]:
     out = []
-    for line in (ROOT / "data/candidates.txt").read_text(encoding="utf-8").splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
@@ -50,8 +52,8 @@ async def probe(client: PoliteClient, ats: str, name: str, slugs: list[str]):
     return None
 
 
-async def main() -> None:
-    cands = candidates()
+async def main(path: Path, merge: bool) -> None:
+    cands = candidates(path)
     async with PoliteClient() as client:
         tasks = [probe(client, ats, name, slugs) for name, slugs in cands for ats in ADAPTERS]
         results = [r for r in await asyncio.gather(*tasks) if r]
@@ -59,21 +61,33 @@ async def main() -> None:
     errors = [r for r in results if "error" in r]
     found = [r for r in results if "error" not in r]
     keep = sorted((r for r in found if r["india"] > 0), key=lambda r: -r["india"])
-    with open(ROOT / "data/companies.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["name", "ats", "slug", "city"])
-        for r in keep:
-            w.writerow([r["name"], r["ats"], r["slug"], r["city"]])
+    out = ROOT / "data/companies.csv"
+    rows = {}
+    if merge and out.exists():
+        with open(out, encoding="utf-8") as f:
+            rows = {(r["ats"], r["slug"]): r for r in csv.DictReader(f)}
+    for r in keep:
+        rows[(r["ats"], r["slug"])] = {k: r[k] for k in ("name", "ats", "slug", "city")}
+    with open(out, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["name", "ats", "slug", "city"])
+        w.writeheader()
+        w.writerows(rows.values())
 
     lines = ["| company | ats | slug | jobs | india/remote |", "| --- | --- | --- | --- | --- |"]
     lines += [f"| {r['name']} | {r['ats']} | {r['slug']} | {r['total']} | {r['india']} |"
               for r in sorted(found, key=lambda r: -r["india"])]
     lines += ["", "Errors:"] + [f"- {r['name']} {r['ats']} {r['slug']}: {r['error']}"
                                 for r in errors]
-    (ROOT / "data/discovery_report.md").write_text("\n".join(lines), encoding="utf-8")
+    report = ROOT / f"data/discovery_report_{path.stem}.md"
+    report.write_text("\n".join(lines), encoding="utf-8")
     print(f"candidates={len(cands)} boards_found={len(found)} kept={len(keep)} "
-          f"india_jobs={sum(r['india'] for r in keep)} errors={len(errors)}")
+          f"india_jobs={sum(r['india'] for r in keep)} errors={len(errors)} "
+          f"companies_csv_rows={len(rows)}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--file", default=str(ROOT / "data/candidates.txt"))
+    ap.add_argument("--merge", action="store_true")
+    a = ap.parse_args()
+    asyncio.run(main(Path(a.file), a.merge))

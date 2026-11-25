@@ -1,0 +1,186 @@
+# Batch 3 (25 Nov): remote-first global startups, plus remote-friendly Indian dev-tool startups.
+# Run with: python -m scripts.discover_slugs --file data/candidates_remote.txt --merge
+Prefect|prefect,prefecthq
+Astronomer
+Metabase
+Appwrite
+Directus
+Strapi
+Ghost|ghost,ghostfoundation
+Plausible|plausible,plausibleanalytics
+Fly.io|flyio,fly
+Railway|railway
+Render|render
+Netlify
+Deno|deno,denoland
+Oven|oven,ovensh
+Tailscale
+Teleport|teleport,gravitational
+Pulumi
+Chainguard
+Zed Industries|zed,zedindustries
+Warp|warp,warpdotdev
+Raycast
+Loom|loom
+Miro|miro
+Buffer|buffer
+Kit|kit,convertkit
+Discourse|discourse,civilizeddiscourse
+Close|close,closeio
+Help Scout|helpscout
+Customer.io|customerio
+Andela|andela
+X-Team|xteam
+Gitpod|gitpod
+Coder|coder
+CodeSandbox|codesandbox
+Clerk|clerk,clerkdev
+Stytch|stytch
+WorkOS|workos
+Resend|resend
+Neon|neon,neondatabase
+PlanetScale|planetscale
+Timescale|timescale,tigerdata
+Budibase
+NocoDB|nocodb
+Dyte|dyte,dyteio
+100ms|100ms,100mslive
+NEAR|near,nearfoundation,pagoda
+Solana Labs|solanalabs,solana,solanafoundation
+Aptos Labs|aptoslabs,aptos
+Mysten Labs|mystenlabs
+Eigen Labs|eigenlabs,eigenlayer
+Offchain Labs|offchainlabs
+OP Labs|oplabs,optimism
+Uniswap Labs|uniswaplabs,uniswap
+OpenSea|opensea
+Dapper Labs|dapperlabs
+Parity|parity,paritytech
+Web3 Foundation|web3foundation,web3
+Protocol Labs|protocollabs
+Status|status,statusim
+Gnosis|gnosis
+Safe|safe,safeglobal
+Ledger|ledger
+SatoshiLabs|satoshilabs,trezor
+OKX|okx
+Bybit|bybit
+Bitpanda|bitpanda
+Nansen|nansen
+Dune|dune,duneanalytics
+Messari|messari
+Edge & Node|edgeandnode,thegraph
+ChainSafe|chainsafe
+Lido|lido,lidofinance
+Celestia|celestia,celestialabs
+Matter Labs|matterlabs,zksync
+StarkWare|starkware
+Wormhole|wormhole,wormholefoundation
+LayerZero|layerzero,layerzerolabs
+Fireblocks|fireblocks
+Anchorage|anchorage,anchoragedigital
+Figure|figure
+Replicate|replicate
+fal|fal,falai
+ElevenLabs|elevenlabs
+Synthesia|synthesia
+Deepgram|deepgram
+AssemblyAI|assemblyai
+Runway|runway,runwayml
+Stability AI|stabilityai,stability
+Perplexity|perplexity,perplexityai
+Anysphere|anysphere,cursor
+Lovable|lovable
+StackBlitz|stackblitz
+Velocity Global|velocityglobal
+Papaya Global|papayaglobal
+Multiplier|multiplier,usemultiplier
+Skuad|skuad
+Hubstaff|hubstaff
+Time Doctor|timedoctor
+DeepSource|deepsource
+Keploy|keploy
+Requestly|requestly
+Hoppscotch|hoppscotch
+OpenObserve|openobserve
+Middleware|middleware,middlewareio
+Peerlist|peerlist
+Toddle|toddle,toddleapp
+BiteSpeed|bitespeed
+Zania|zania
+GitStart|gitstart
+Nhost|nhost
+Infisical|infisical
+Cal Com|calcom
+Trigger.dev|triggerdev,trigger
+Inngest|inngest
+Convex|convex,convexdev
+Turso|turso,chiselstrike
+Sanity|sanity,sanityio
+Contentful|contentful
+Storyblok|storyblok
+Webflow|webflow
+Framer|framer
+Canva|canva
+Pitch|pitch
+Typeform|typeform
+Calendly|calendly
+Zoom|zoom
+Twingate|twingate
+Tines|tines
+Vanta|vanta
+Drata|drata
+Snyk Ltd|snykltd
+Semgrep|semgrep,r2c
+Socket|socket,socketdev
+Sonar|sonar,sonarsource
+Kong|kong,konghq
+Tyk|tyk,tyktechnologies
+Ably|ably
+Stream|stream,getstream
+LiveKit|livekit
+Daily|daily,dailyco
+Agora|agora
+Mux|mux
+Cloudinary|cloudinary
+ImageKit|imagekit
+Postmark|postmark,activecampaign
+Sendbird|sendbird
+Twilio Segment|segment
+Amplitude|amplitude
+Mixpanel|mixpanel
+Heap|heap
+FullStory|fullstory
+LogRocket|logrocket
+Honeycomb|honeycomb,honeycombio
+Chronosphere|chronosphere
+Axiom|axiom,axiomhq
+Better Stack|betterstack
+Checkly|checkly
+Kestra|kestra
+Airplane|airplane
+Retool|retool
+Appian|appian
+Bubble|bubble
+Glide|glide,glideapps
+Softr|softr
+Tally|tally
+Fillout|fillout
+Hashnode|hashnode
+DEV Community|forem,dev
+Exercism|exercism
+freeCodeCamp|freecodecamp
+Khan Academy|khanacademy
+Duolingo|duolingo
+Coursera|coursera
+Udemy|udemy
+Brilliant|brilliant
+Quizlet|quizlet
+Kahoot|kahoot
+Grammarly|grammarly
+DeepL|deepl
+Proton|proton,protonag
+Tuta|tuta,tutanota
+Brave|brave,brave software
+Mullvad|mullvad
+Kagi|kagi

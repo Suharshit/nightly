@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: nightly
+          POSTGRES_PASSWORD: nightly
+          POSTGRES_DB: nightly
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U nightly"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql://nightly:nightly@localhost:5432/nightly
+      PGPASSWORD: nightly
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements-dev.txt
+            worker/requirements.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Apply schema
+        run: |
+          psql -h localhost -U nightly -d nightly -v ON_ERROR_STOP=1 -f db/local/000_auth_stub.sql
+          psql -h localhost -U nightly -d nightly -v ON_ERROR_STOP=1 -f db/migrations/001_init.sql
+      - run: ruff check .
+      - run: pytest -q -rs
