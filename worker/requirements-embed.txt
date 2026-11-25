@@ -1,0 +1,7 @@
+# Only for worker/embed.py (and later the API's embedder/reranker). Kept out of
+# requirements.txt so CI's lint + test job doesn't download ~200 MB of torch.
+# The CPU index gives the CPU-only torch wheel instead of the multi-GB CUDA build.
+--extra-index-url https://download.pytorch.org/whl/cpu
+-r requirements.txt
+torch==2.15.0+cpu
+sentence-transformers==6.3.0

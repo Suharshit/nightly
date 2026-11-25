@@ -2,7 +2,7 @@ name: nightly-ingest
 
 # 20:30 UTC = 02:00 IST. Fetch boards, then the free rules extraction, then the Groq pass
 # for whatever the rules left (resumable: anything over the daily quota waits for tomorrow).
-# Embedding is added here once embed.py lands.
+# Then embed.py (bge-small on CPU) for new or changed jobs.
 
 on:
   schedule:
@@ -30,10 +30,19 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-          cache-dependency-path: worker/requirements.txt
-      - run: pip install -r worker/requirements.txt
+          cache-dependency-path: worker/requirements*.txt
+      - run: pip install -r worker/requirements-embed.txt
+      - name: Cache the embedding model
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/huggingface
+          key: hf-bge-small-en-v1.5
       - run: python -m worker.ingest
       - run: python -m worker.extract --backend rules
       - name: LLM pass (Groq)
         if: env.GROQ_API_KEY != ''
         run: python -m worker.extract --backend groq --limit 300
+      # Runs even if the Groq pass failed: embedding doesn't depend on it.
+      - name: Embed
+        if: ${{ !cancelled() }}
+        run: python -m worker.embed
