@@ -23,3 +23,6 @@
 - Broken: signed-in timing on Supabase not measured (needs a real Supabase user, so the web app). A job shown 3 times is hidden, so 3 feed refreshes rotate the top matches; revisit once real users try it.
 - Done: search eval tooling. Snapshot frozen on Supabase in the `eval` schema (1,798 jobs). Pool = union of each variant's top 20, shuffled: 1,825 (query, job) pairs for the owner to label with `python -m eval.label`. Then `python -m eval.run_search_eval` writes the table into eval/results.md.
 - Next: owner labels the pool; agent loop with 5 tools.
+- Done: labeller shows 900 chars from the first role heading instead of the company blurb, plus any "N years" sentence from anywhere in the text (1,153 of 1,798 snapshot jobs start their role section after char 700; years appear in the first 700 chars for only 132 of 1,511). Owner labels: q01–q09 done, 340/1,825 pairs (2 = 5, 1 = 71, 0 = 264).
+- Broken: extraction guesses experience. 114 of the 122 intern/fresher jobs never mention years; 209 jobs have min/max experience filled although the text states none. The snapshot is 72% senior (1,295/1,798), so fresher queries have few true matches. Search missed all 7 Zscaler jobs with Go in the title for "golang developer" (q04).
+- Next: owner keeps labelling q10–q50 at depth 20; agent loop with 5 tools.

@@ -12,6 +12,7 @@ Needs DATABASE_URL pointing at the database that holds the `eval` snapshot.
 
 import argparse
 import json
+import re
 import sys
 import time
 from collections import Counter
@@ -39,8 +40,42 @@ Keys: 2 / 1 / 0, s = skip for now, b = go back one, q = save and quit
 
 DETAILS = """
 select j.id, j.title, c.name, j.city, j.work_mode, j.remote, j.seniority, j.min_exp_years,
-       j.max_exp_years, j.skills, left(j.description_text, 700)
+       j.max_exp_years, j.skills, j.description_text
 from eval.jobs j join eval.companies c on c.id = j.company_id where j.id = any(%s)"""
+
+SHOW_CHARS = 900
+
+# Headings that start the part about the job itself. Most descriptions open with a company
+# blurb ("About Plane", "About us"), which tells the labeller nothing about level or stack.
+# The list comes from the most common short heading lines in the eval snapshot.
+_ROLE = (r"about (?:the|this) (?:role|position|job|opportunity)|(?:the |your )?role(?: overview)?"
+         r"|the opportunity|job (?:summary|description)|summary|in this role"
+         r"|what you(?:'|’)ll (?:do|be doing)|what you will (?:do|be doing)"
+         r"|(?:key )?responsibilities|(?:minimum |basic |required )?(?:requirements|qualifications)"
+         r"|who you are|about you|what (?:we(?:'|’)re|we are|we) look(?:ing)? for"
+         r"|what you(?:'|’)ll bring|what you bring|what you will need|the impact you will have")
+ROLE_HEADING = re.compile(rf"^[ \t#*•-]*(?:{_ROLE})\b[^\n]{{0,45}}$", re.I | re.M)
+EXPERIENCE = re.compile(
+    r"[^.\n]*\b\d+\s*\+?\s*(?:(?:-|–|to)\s*\d+\s*\+?\s*)?(?:years?|yrs)\b[^.\n]*", re.I)
+
+
+def role_text(desc: str | None, n: int = SHOW_CHARS) -> str:
+    """About n characters starting at the first role heading, or from the top if none."""
+    desc = desc or ""
+    m = ROLE_HEADING.search(desc)
+    return " ".join(desc[m.start() if m else 0:].split())[:n]
+
+
+def experience_lines(desc: str | None, limit: int = 3) -> list[str]:
+    """Sentences anywhere in the description that state years of experience."""
+    out: list[str] = []
+    for m in EXPERIENCE.finditer(desc or ""):
+        s = " ".join(m.group().split())
+        if s not in out:
+            out.append(s[:200])
+        if len(out) == limit:
+            break
+    return out
 
 
 def build_pool(depth: int) -> None:
@@ -89,7 +124,13 @@ def show(q: dict, row: tuple, i: int, n: int) -> None:
     print(f"{title}  @ {company}")
     print(f"Place: {place}   Level: {sen or '-'}   Experience: {exp}")
     print(f"Skills: {', '.join(skills or []) or '-'}")
-    print(" ".join((desc or "").split())[:700])
+    years = experience_lines(desc)
+    for line in years:
+        print(f"Says: {line}")
+    if not years:
+        print("Says: no years of experience anywhere in the description, so Level and "
+              "Experience above are the extractor's guess")
+    print(role_text(desc))
 
 
 def ask() -> str:
