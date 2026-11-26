@@ -183,20 +183,24 @@ def test_loop_survives_llm_errors_and_logs_fallback_model(fake_search):
 
 
 def test_signed_in_turn_uses_memory_and_saves_messages(fake_search):
-    history = [("assistant", "Here you go", {"job_ids": [7]}), ("user", "python jobs", None)]
-    db = DB(one=[None], all_rows=history)          # no profile row yet; 2 old messages
+    # Newest first, as the query returns them; the oldest row predates the "shown" field.
+    history = [("assistant", "Here you go", {"job_ids": [7], "shown": ["7 Backend Intern @ Acme"]}),
+               ("user", "python jobs", None), ("assistant", "Older", {"job_ids": [5]})]
+    db = DB(one=[None], all_rows=history)          # no profile row yet; 3 old messages
     llm = FakeLLM([tool_call("search_jobs", {"query": "python"}),
                    answer({"reply": "One more", "job_ids": [7]})])
     loop.Agent(db, None, None, llm).respond(USER, "more like that")
     sent = llm.calls[0]["messages"]
     assert sent[1]["content"].startswith("User profile:")
-    # Stored newest first, sent oldest first, with the shown ids for "the second one".
-    assert sent[2] == {"role": "user", "content": "python jobs"}
-    assert sent[3]["content"].endswith("(jobs shown, in order: [7])")
+    # Sent oldest first, with the shown jobs so "the second one" or "the Acme one" resolves.
+    assert sent[2]["content"] == "Older\n(jobs shown, in order: 5)"
+    assert sent[3] == {"role": "user", "content": "python jobs"}
+    assert sent[4]["content"].endswith("(jobs shown, in order: 7 Backend Intern @ Acme)")
     assert sent[-1] == {"role": "user", "content": "more like that"}
     (msgs,) = db.sql("insert into messages")
     assert msgs[1] == "more like that" and msgs[3] == "One more"
     assert json.loads(msgs[4])["job_ids"] == [7]
+    assert json.loads(msgs[4])["shown"] == ["7 Backend Intern @ Acme"]
     assert db.sql("insert into interactions")[0][1] == [7]       # logged as shown
 
 

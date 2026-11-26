@@ -34,6 +34,9 @@ class Turn:
     model: str
     tool_calls: list[dict] = field(default_factory=list)
     error: str | None = None
+    dropped: list[int] = field(default_factory=list)   # invented ids the guardrail removed
+    latency_ms: int = 0
+    usage: dict = field(default_factory=dict)
 
 
 def parse(content: str | None) -> tuple[AgentReply | None, str | None]:
@@ -48,14 +51,20 @@ def parse(content: str | None) -> tuple[AgentReply | None, str | None]:
                                for x in e.errors()[:3])
 
 
+def shown(c: dict) -> str:
+    """How a shown job is remembered, so "the Plane one" or "the second one" can be resolved."""
+    return f"{c['id']} {c['title']} @ {c['company']}"
+
+
 def load_history(cur, user_id: str) -> list[dict]:
     cur.execute("select role, content, tool_calls from messages where user_id = %s "
                 "order by created_at desc, id desc limit %s", (user_id, HISTORY))
     out = []
     for role, content, extra in reversed(cur.fetchall()):
-        ids = (extra or {}).get("job_ids") if role == "assistant" else None
+        extra = (extra or {}) if role == "assistant" else {}
+        jobs = extra.get("shown") or [str(i) for i in extra.get("job_ids") or []]
         out.append({"role": role, "content": (content or "") +
-                    (f"\n(jobs shown, in order: {ids})" if ids else "")})
+                    (f"\n(jobs shown, in order: {'; '.join(jobs)})" if jobs else "")})
     return out
 
 
@@ -126,8 +135,10 @@ class Agent:
         if model != self.llm.model:
             errors.append(f"answered by fallback model {model}")
         turn = Turn(reply=reply, jobs=[ctx.seen[j] for j in reply.job_ids], json_valid=valid,
-                    model=model, tool_calls=calls, error="; ".join(errors) or None)
-        self._save(user, message, turn, usage, int((time.perf_counter() - started) * 1000))
+                    model=model, tool_calls=calls, error="; ".join(errors) or None,
+                    dropped=dropped, usage=usage,
+                    latency_ms=int((time.perf_counter() - started) * 1000))
+        self._save(user, message, turn, usage, turn.latency_ms)
         return turn
 
     def _save(self, user, message: str, turn: Turn, usage: dict, latency_ms: int) -> None:
@@ -138,7 +149,8 @@ class Agent:
                             "(%s, 'user', %s, null), (%s, 'assistant', %s, %s::jsonb)",
                             (user["id"], message, user["id"], turn.reply.reply,
                              json.dumps({"calls": turn.tool_calls,
-                                         "job_ids": turn.reply.job_ids})))
+                                         "job_ids": turn.reply.job_ids,
+                                         "shown": [shown(c) for c in turn.jobs]})))
                 prof.log_shown(cur, user["id"], turn.reply.job_ids)
             cur.execute("insert into agent_logs (user_id, model, latency_ms, prompt_tokens, "
                         "completion_tokens, tool_calls, json_valid, error) "
