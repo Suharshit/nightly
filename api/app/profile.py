@@ -121,6 +121,10 @@ def record_feedback(cur, user: dict, job_id: int, action: str,
                     (moved_taste(cur.fetchone()[0], job_vec), user["id"]))
         changed["taste"] = "moved toward this job"
     if action == "dislike" and reason:
+        # "Too senior" for a job tagged intern/fresher means the tag is wrong (extraction
+        # guesses), not that the user wants to avoid entry-level jobs.
+        if reason == "too_senior" and seniority in ("intern", "fresher"):
+            seniority = None
         key, value = {"too_senior": ("seniority", seniority),
                       "wrong_location": ("cities", city),
                       "not_interested": ("companies", company_id)}[reason]
