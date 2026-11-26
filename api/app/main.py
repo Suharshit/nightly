@@ -6,9 +6,10 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from api.app import profile as prof
+from api.app.agent.loop import Agent
 from api.app.auth import current_user, optional_user
 from api.app.resume import MAX_BYTES, ResumeError, embed_text, pdf_text, resume_skills
 from api.app.search import pipeline
@@ -27,6 +28,12 @@ async def lifespan(app: FastAPI):
     if not hasattr(app.state, "reranker"):
         from api.app.models import Reranker
         app.state.reranker = Reranker()
+    if not hasattr(app.state, "llm"):
+        try:
+            from api.app.agent.llm import GroqChat
+            app.state.llm = GroqChat()
+        except KeyError:      # no GROQ_API_KEY: everything but /chat still works
+            app.state.llm = None
     if not hasattr(app.state, "auth"):
         from api.app.auth import SupabaseAuth
         app.state.auth = SupabaseAuth()
@@ -193,3 +200,30 @@ def me(request: Request, user: Annotated[dict, Depends(current_user)]) -> Me:
     if row is None:
         return Me(email=user["email"], has_resume=False, resume_skills=[], prefs={})
     return Me(email=user["email"], has_resume=row[0], resume_skills=row[1], prefs=row[2])
+
+
+class ChatIn(BaseModel):
+    message: str = Field(min_length=1, max_length=500)
+
+
+class ChatOut(BaseModel):
+    reply: str
+    jobs: list[dict]          # cards in the order the agent ranked them, each with its reason
+    follow_up_chips: list[str]
+    json_valid: bool
+    took_ms: int
+
+
+@app.post("/chat", response_model=ChatOut)
+def chat(request: Request, body: ChatIn,
+         user: Annotated[dict | None, Depends(optional_user)]) -> ChatOut:
+    """Signed in: memory and saved preferences. Anonymous: a one-off search chat."""
+    st = request.app.state
+    if st.llm is None:
+        raise HTTPException(503, "Chat is not configured on this server.")
+    started = time.perf_counter()
+    turn = Agent(st.pool, st.embedder, st.reranker, st.llm).respond(user, body.message.strip())
+    jobs = [c | {"reason": turn.reply.reasons.get(c["id"]) or c["reason"]} for c in turn.jobs]
+    return ChatOut(reply=turn.reply.reply, jobs=jobs, follow_up_chips=turn.reply.follow_up_chips,
+                   json_valid=turn.json_valid,
+                   took_ms=int((time.perf_counter() - started) * 1000))
