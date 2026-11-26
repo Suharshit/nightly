@@ -1,0 +1,36 @@
+{"id": "a01", "message": "Find me python backend internships", "prefs": {}, "history": []}
+{"id": "a02", "message": "frontend jobs in Bengaluru", "prefs": {}, "history": []}
+{"id": "a03", "message": "any data analyst roles for freshers?", "prefs": {}, "history": []}
+{"id": "a04", "message": "golang developer", "prefs": {}, "history": []}
+{"id": "a05", "message": "remote devops jobs", "prefs": {}, "history": []}
+{"id": "a06", "message": "ML internships, I know pytorch and python", "prefs": {}, "history": []}
+{"id": "a07", "message": "jobs in pune or hyderabad for freshers", "prefs": {}, "history": []}
+{"id": "a08", "message": "koi remote python job hai?", "prefs": {}, "history": []}
+{"id": "a09", "message": "react natve developer", "prefs": {}, "history": []}
+{"id": "a10", "message": "show me something new", "prefs": {"level": "fresher"}, "history": []}
+{"id": "a11", "message": "only remote from now on", "prefs": {}, "history": []}
+{"id": "a12", "message": "I moved to Pune, show jobs there from now on", "prefs": {}, "history": []}
+{"id": "a13", "message": "add Hyderabad to my cities", "prefs": {"cities": ["Bengaluru"]}, "history": []}
+{"id": "a14", "message": "remove Bengaluru from my cities", "prefs": {"cities": ["Bengaluru", "Pune"]}, "history": []}
+{"id": "a15", "message": "I'm a final-year student, so internships only please", "prefs": {}, "history": []}
+{"id": "a16", "message": "I'm not only looking for remote any more", "prefs": {"remote": true}, "history": []}
+{"id": "a17", "message": "tell me more about the second one", "prefs": {}, "history": [{"role": "user", "content": "python backend jobs"}, {"role": "assistant", "content": "Here are three Python backend picks.", "shown": ["1445 Software Engineer, Backend (Python) @ Plane", "999 SDK Engineer - Python @ Supabase", "1442 Software Engineer, Backend (Node.js) @ Plane"]}]}
+{"id": "a18", "message": "why is the first one a good fit for me?", "prefs": {}, "history": [{"role": "user", "content": "python backend jobs"}, {"role": "assistant", "content": "Here are three Python backend picks.", "shown": ["1445 Software Engineer, Backend (Python) @ Plane", "999 SDK Engineer - Python @ Supabase", "1442 Software Engineer, Backend (Node.js) @ Plane"]}]}
+{"id": "a19", "message": "I like the Plane backend one", "prefs": {}, "history": [{"role": "user", "content": "python backend jobs"}, {"role": "assistant", "content": "Here are three Python backend picks.", "shown": ["1445 Software Engineer, Backend (Python) @ Plane", "999 SDK Engineer - Python @ Supabase", "1442 Software Engineer, Backend (Node.js) @ Plane"]}]}
+{"id": "a20", "message": "the third one is too senior for me", "prefs": {}, "history": [{"role": "user", "content": "python backend jobs"}, {"role": "assistant", "content": "Here are three Python backend picks.", "shown": ["1445 Software Engineer, Backend (Python) @ Plane", "999 SDK Engineer - Python @ Supabase", "1442 Software Engineer, Backend (Node.js) @ Plane"]}]}
+{"id": "a21", "message": "these are way too senior", "prefs": {"level": "fresher"}, "history": [{"role": "user", "content": "go jobs"}, {"role": "assistant", "content": "Two Go roles I found.", "shown": ["389 Sr. Staff Software Development Engineer - Go + Networking @ Zscaler", "516 Senior Platform Engineer @ MongoDB"]}]}
+{"id": "a22", "message": "what skills am I missing for this one?", "prefs": {}, "history": [{"role": "user", "content": "backend internships"}, {"role": "assistant", "content": "This GitLab role uses Go.", "shown": ["1026 Intermediate Backend Engineer, India @ GitLab"]}]}
+{"id": "a23", "message": "why don't you show me senior roles?", "prefs": {"level": "fresher"}, "history": []}
+{"id": "a24", "message": "thanks, that's helpful!", "prefs": {}, "history": [{"role": "user", "content": "python backend jobs"}, {"role": "assistant", "content": "Here are three Python backend picks.", "shown": ["1445 Software Engineer, Backend (Python) @ Plane", "999 SDK Engineer - Python @ Supabase", "1442 Software Engineer, Backend (Node.js) @ Plane"]}]}
+{"id": "a25", "message": "hi", "prefs": {}, "history": []}
+{"id": "a26", "message": "write my cover letter for Plane", "prefs": {}, "history": [{"role": "user", "content": "python backend jobs"}, {"role": "assistant", "content": "Here are three Python backend picks.", "shown": ["1445 Software Engineer, Backend (Python) @ Plane", "999 SDK Engineer - Python @ Supabase", "1442 Software Engineer, Backend (Node.js) @ Plane"]}]}
+{"id": "a27", "message": "what's the salary for the second one?", "prefs": {}, "history": [{"role": "user", "content": "python backend jobs"}, {"role": "assistant", "content": "Here are three Python backend picks.", "shown": ["1445 Software Engineer, Backend (Python) @ Plane", "999 SDK Engineer - Python @ Supabase", "1442 Software Engineer, Backend (Node.js) @ Plane"]}]}
+{"id": "a28", "message": "anything with Go?", "prefs": {}, "history": [{"role": "user", "content": "python backend jobs"}, {"role": "assistant", "content": "Here are three Python backend picks.", "shown": ["1445 Software Engineer, Backend (Python) @ Plane", "999 SDK Engineer - Python @ Supabase", "1442 Software Engineer, Backend (Node.js) @ Plane"]}]}
+{"id": "a29", "message": "only remote", "prefs": {}, "history": [{"role": "user", "content": "python backend jobs"}, {"role": "assistant", "content": "Here are three Python backend picks.", "shown": ["1445 Software Engineer, Backend (Python) @ Plane", "999 SDK Engineer - Python @ Supabase", "1442 Software Engineer, Backend (Node.js) @ Plane"]}]}
+{"id": "a30", "message": "show me 10 jobs at once", "prefs": {}, "history": []}
+{"id": "a31", "message": "jobs at Supabase", "prefs": {}, "history": []}
+{"id": "a32", "message": "backend jobs that don't need Java", "prefs": {}, "history": []}
+{"id": "a33", "message": "I hate sales jobs, never show them to me", "prefs": {}, "history": []}
+{"id": "a34", "message": "internship in Mumbai, remote is also fine", "prefs": {}, "history": []}
+{"id": "a35", "message": "apply to the first one for me", "prefs": {}, "history": [{"role": "user", "content": "python backend jobs"}, {"role": "assistant", "content": "Here are three Python backend picks.", "shown": ["1445 Software Engineer, Backend (Python) @ Plane", "999 SDK Engineer - Python @ Supabase", "1442 Software Engineer, Backend (Node.js) @ Plane"]}]}
+{"id": "a36", "message": "tell me about job 4242", "prefs": {}, "history": []}
