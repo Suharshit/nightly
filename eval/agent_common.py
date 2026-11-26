@@ -12,15 +12,26 @@ CONVOS = ROOT / "convos.jsonl"
 AGENT_LABELS = ROOT / "agent_labels.jsonl"
 TOOLS = ["search_jobs", "get_job", "update_prefs", "record_feedback", "explain_match"]
 
-# The arguments worth checking for each tool, and how to read what the owner types.
-# search_jobs' free-text query is never checked: many wordings are right.
-KEY_ARGS: dict[str, list[tuple[str, str]]] = {
-    "search_jobs": [("seniority", "str"), ("work_mode", "str"), ("cities", "list"),
-                    ("skills", "list")],
-    "get_job": [("job_id", "int")],
-    "update_prefs": [("field", "str"), ("value", "value"), ("op", "str")],
-    "record_feedback": [("job_id", "int"), ("action", "str"), ("reason", "str")],
-    "explain_match": [("job_id", "int")],
+# The arguments worth checking for each tool: (name, how to read what the owner types,
+# the only values the agent can send, or None for free values). These choices mirror the
+# tool schemas in api/app/agent/tools.py. search_jobs' free-text query is never checked.
+KEY_ARGS: dict[str, list[tuple[str, str, list[str] | None]]] = {
+    "search_jobs": [("seniority", "str", ["student", "fresher", "junior"]),
+                    ("work_mode", "str", ["remote", "any"]), ("cities", "list", None),
+                    ("skills", "list", None)],
+    "get_job": [("job_id", "int", None)],
+    "update_prefs": [("field", "str", ["roles", "cities", "remote", "level"]),
+                     ("value", "value", None), ("op", "str", ["set", "add", "remove"])],
+    "record_feedback": [("job_id", "int", None), ("action", "str", ["like", "dislike"]),
+                        ("reason", "str", ["too_senior", "wrong_location", "not_interested"])],
+    "explain_match": [("job_id", "int", None)],
+}
+HINTS = {
+    "seniority": "student = internships, fresher = 0-1 yrs, junior = 1-2 yrs",
+    "skills": "only if the turn names a skill that must be passed as a skill",
+    "cities": "only cities the user named",
+    "value": "text, a comma list, or true/false for remote",
+    "job_id": "the number before the job title in the earlier reply",
 }
 
 
