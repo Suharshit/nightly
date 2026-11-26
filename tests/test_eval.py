@@ -121,6 +121,51 @@ def test_label_loop_writes_back_skips_and_resumes(tmp_path, monkeypatch, capsys)
     assert common.load_labels()["q01"] == {10: 2, 11: 0, 12: 1, 13: 0}
 
 
+PLANE_LIKE = """ABOUT PLANE
+
+Plane's mission is to build the infrastructure the world's work runs on. """ + "Blurb. " * 200 + """
+
+About the role:
+Build backend services in Node.js.
+
+Requirements
+3+ years of backend experience. Strong SQL.
+"""
+
+
+def test_role_text_skips_the_company_blurb():
+    from eval.label import role_text
+    text = role_text(PLANE_LIKE)
+    assert text.startswith("About the role: Build backend services")
+    assert "3+ years of backend experience" in text
+    assert len(role_text("x" * 5000)) == 900
+
+
+def test_role_text_falls_back_to_the_top_and_ignores_about_us():
+    from eval.label import role_text
+    assert role_text("About us\nWe sell shoes.\nAbout the team\nNice people.") \
+        == "About us We sell shoes. About the team Nice people."
+    assert role_text(None) == ""
+    # A heading word inside a sentence is not a heading.
+    assert role_text("We value the role of tests.\nMore.").startswith("We value")
+
+
+def test_role_heading_variants():
+    from eval.label import role_text
+    for h in ("What you’ll do", "What You'll Be Doing", "Key Responsibilities:",
+              "Minimum Qualifications", "What we're looking for", "## Who you are",
+              "Role Overview", "The Opportunity"):
+        assert role_text(f"About Acme\nWe are great.\n{h}\nShip code.").startswith(h)
+
+
+def test_experience_lines_find_years_anywhere():
+    from eval.label import experience_lines
+    assert experience_lines(PLANE_LIKE) == ["3+ years of backend experience"]
+    assert experience_lines("Need 2-4 yrs in Go. Also 5 years Java. Founded in 2019.") == \
+        ["Need 2-4 yrs in Go", "Also 5 years Java"]
+    assert experience_lines(None) == []
+
+
 def test_build_pool_refuses_when_labels_exist(tmp_path, monkeypatch):
     from eval import label
     pool_f, labels_f = tmp_path / "pool.jsonl", tmp_path / "labels.jsonl"
