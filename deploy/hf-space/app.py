@@ -1,11 +1,15 @@
 """Entry point for the Hugging Face Space.
 
 Free accounts can only create Gradio Spaces on ZeroGPU hardware. The Space runs `python app.py`.
-Gradio's server is FastAPI, so the nightly API is served as it is, with a one-line Gradio page
-mounted at /ui (API routes are matched first). The models run on CPU; no GPU is ever requested.
+Gradio's server is FastAPI, so the nightly API is served as it is, with a small Gradio page
+mounted at / (the API's own routes are registered first, so they win). The models run on CPU;
+no GPU is ever requested.
+
+ZeroGPU only starts an app that has a @spaces.GPU function wired to a Gradio event, so one
+stub sits behind a hidden button. Nothing calls it, so no GPU quota is used.
 """
 
-try:  # Only installed on ZeroGPU. It must be imported before torch.
+try:  # Only installed on ZeroGPU. It must be imported before torch and gradio.
     import spaces
 except ImportError:
     spaces = None
@@ -15,18 +19,21 @@ import uvicorn
 
 from api.app.main import app
 
-if spaces is not None:
-    @spaces.GPU
-    def _unused() -> None:
-        """ZeroGPU expects at least one @spaces.GPU function at startup. Never called, so no
-        GPU quota is used."""
 
+def _gpu_stub() -> str:
+    return "ok"
+
+
+if spaces is not None:
+    _gpu_stub = spaces.GPU(_gpu_stub)
 
 with gr.Blocks(title="nightly API") as ui:
     gr.Markdown("The API behind [nightly](https://nightlyjobs.vercel.app). "
-                "Health check: [/health](/health).")
+                "Health check: [/health](/health). API docs: [/docs](/docs).")
+    _out = gr.Textbox(visible=False)
+    gr.Button(visible=False).click(_gpu_stub, outputs=_out)
 
-app = gr.mount_gradio_app(app, ui, path="/ui")
+app = gr.mount_gradio_app(app, ui, path="/")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=7860)

@@ -50,7 +50,12 @@ jobs:
           python app.py > app.log 2>&1 &
           for i in $(seq 1 90); do
             if curl -sf http://127.0.0.1:7860/openapi.json | grep -q '"/matches"'; then
-              curl -sf http://127.0.0.1:7860/ui/ > /dev/null && echo "API and /ui answer"
+              # The API's routes win over the Gradio page mounted at /.
+              curl -s http://127.0.0.1:7860/health -o /dev/null -w "%{http_code}" | grep -q 500 \
+                || { echo "/health is not the API's route"; exit 1; }   # 500: fake database
+              curl -sf http://127.0.0.1:7860/ > /dev/null
+              curl -sf http://127.0.0.1:7860/config | grep -q '"dependencies"'
+              echo "API, Gradio page and Gradio config answer"
               exit 0
             fi
             sleep 2
