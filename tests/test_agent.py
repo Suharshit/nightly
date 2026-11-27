@@ -278,15 +278,53 @@ def test_chat_route_returns_cards_with_reasons(api, fake_search):
 
 # --- fixes found in the live 5-turn run ------------------------------------------------
 
-def test_malformed_tool_call_is_reasked_without_tools(fake_search):
+def test_unreadable_malformed_tool_call_is_asked_again_then_without_tools(fake_search):
     from api.app.agent.llm import ToolUseFailed
     llm = FakeLLM([tool_call("get_job", {"job_id": 7}),
-                   ToolUseFailed("attempted to call tool 'JSON'"),
+                   ToolUseFailed("bad"), ToolUseFailed("bad again"),
                    answer({"reply": "Here it is", "job_ids": []})])
     turn = loop.Agent(DB(), None, None, llm).respond(None, "tell me more about the first one")
-    assert llm.calls[2]["tools"] is None and llm.calls[2]["json_only"]
+    assert [c["tools"] is not None for c in llm.calls] == [True, True, True, False]
     assert turn.json_valid and turn.reply.reply == "Here it is"
-    assert "malformed tool call" in turn.error
+    assert "malformed tool call, re-asked" in turn.error
+
+
+def test_reply_sent_as_a_json_tool_is_used_as_the_answer(fake_search):
+    from api.app.agent.llm import ToolUseFailed
+    failed = json.dumps({"name": "JSON", "arguments": {"reply": "Done", "job_ids": [7]}})
+    llm = FakeLLM([tool_call("search_jobs", {"query": "go"}), ToolUseFailed("x", failed)])
+    turn = loop.Agent(DB(), None, None, llm).respond(None, "go jobs")
+    assert len(llm.calls) == 2                      # no extra call needed
+    assert turn.json_valid and turn.reply.reply == "Done" and turn.reply.job_ids == [7]
+    assert "malformed tool call, recovered" in turn.error
+
+
+def test_real_tool_with_a_bad_argument_is_recovered_and_run(fake_search):
+    from api.app.agent.llm import ToolUseFailed
+    failed = json.dumps({"name": "search_jobs",
+                         "arguments": {"query": "python", "location": "Pune, Delhi", "x": ""}})
+    llm = FakeLLM([ToolUseFailed("location not allowed", failed),
+                   answer({"reply": "Found one", "job_ids": [7]})])
+    turn = loop.Agent(DB(), None, None, llm).respond(None, "python jobs in pune or delhi")
+    assert fake_search == [("search_jobs", {"query": "python", "cities": ["Pune", "Delhi"]})]
+    assert turn.reply.job_ids == [7] and turn.json_valid
+
+
+def test_recover_ignores_what_it_cannot_read():
+    assert loop.recover("", 0) is None
+    assert loop.recover("not json", 0) is None
+    assert loop.recover(json.dumps({"name": "delete_all", "arguments": {}}), 0) is None
+    assert loop.recover(json.dumps(["x"]), 0) is None
+
+
+def test_failed_json_mode_falls_back_to_a_plain_ask(fake_search):
+    from api.app.agent.llm import LLMError
+    llm = FakeLLM([answer("not json"), LLMError("json_validate_failed"),
+                   answer({"reply": "ok now", "job_ids": []})])
+    turn = loop.Agent(DB(), None, None, llm).respond(None, "hi")
+    assert llm.calls[1]["json_only"] and not llm.calls[2]["json_only"]
+    assert turn.json_valid and turn.reply.reply == "ok now"
+    assert "JSON mode failed" in turn.error
 
 
 def _groq(monkeypatch, handler):
@@ -358,3 +396,4 @@ def test_too_senior_on_an_intern_tagged_job_adds_no_avoid_rule():
     with db.connection() as cur:
         assert prof.record_feedback(cur, USER, 7, "dislike", "too_senior") == \
             {"avoid": {"seniority": "senior"}}
+
