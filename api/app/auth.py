@@ -56,6 +56,11 @@ class SupabaseAuth:
         self.cache[token] = (until, user)
         return user
 
+    def forget(self, user_id: str) -> None:
+        """Drop cached sign-ins for a deleted user, so their old token stops working at once."""
+        for token in [t for t, (_, u) in self.cache.items() if u["id"] == user_id]:
+            self.cache.pop(token, None)
+
 
 def current_user(request: Request) -> dict:
     scheme, _, token = request.headers.get("authorization", "").partition(" ")

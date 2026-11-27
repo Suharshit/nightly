@@ -211,6 +211,28 @@ def me(request: Request, user: Annotated[dict, Depends(current_user)]) -> Me:
     return Me(email=user["email"], has_resume=row[0], resume_skills=row[1], prefs=row[2])
 
 
+# Deleting the Supabase login removes everything else: auth identities and sessions, and our
+# profiles row, which cascades to interactions, messages and digests_sent. agent_logs has no
+# foreign key (it keeps metrics), so its rows for this user go explicitly.
+DELETE_USER = [
+    "delete from agent_logs where user_id = %(id)s",
+    "delete from auth.users where id = %(id)s",
+]
+
+
+@app.delete("/me")
+def delete_me(request: Request, user: Annotated[dict, Depends(current_user)]) -> dict:
+    """Delete my data: the account, resume, preferences, activity and chat history."""
+    with request.app.state.pool.connection() as conn, conn.cursor() as cur:
+        with conn.transaction():
+            for sql in DELETE_USER:
+                cur.execute(sql, {"id": user["id"]})
+    forget = getattr(request.app.state.auth, "forget", None)
+    if forget:
+        forget(user["id"])
+    return {"deleted": True}
+
+
 class ChatIn(BaseModel):
     message: str = Field(min_length=1, max_length=500)
 
