@@ -119,6 +119,32 @@ def test_guard_drops_unseen_ids_caps_at_five_and_fills_reasons():
     assert dropped == [99, 6]
     assert out.reasons[1] == "data 1" and out.reasons[2] == "model words"
     assert out.follow_up_chips == ["a", "b", "c"]
+    assert out.reply == "x"                       # some jobs kept: the model's text stays
+
+
+def test_guard_replaces_the_text_when_every_named_job_is_dropped():
+    from api.app.agent.schemas import NO_SEARCH_REPLY
+    r = AgentReply(reply="Here are five backend student roles:", job_ids=[4984, 1027])
+    out, dropped = guard(r, {})
+    assert out.job_ids == [] and dropped == [4984, 1027]
+    assert out.reply == NO_SEARCH_REPLY
+    plain = AgentReply(reply="I can only help you find jobs.", job_ids=[])
+    assert guard(plain, {})[0].reply == plain.reply   # no jobs named: nothing to correct
+
+
+def test_off_topic_turn_that_relists_old_ids_gets_an_honest_reply(fake_search):
+    # The live turn: a meta question, no tool calls, five ids from the previous answer.
+    llm = FakeLLM([answer({"reply": "Here are five backend student roles that match:",
+                           "job_ids": [4984, 1027, 1445, 1026, 1005]})])
+    turn = loop.Agent(DB(), None, None, llm).respond(None, "what are no-tool calls here?")
+    assert turn.jobs == [] and turn.reply.job_ids == []
+    assert "didn't search" in turn.reply.reply
+    assert "dropped job ids" in turn.error
+
+
+def test_system_prompt_keeps_the_agent_on_jobs():
+    from api.app.agent.prompts import SYSTEM
+    assert "You only help with finding jobs" in SYSTEM and '"job_ids": []' in SYSTEM
 
 
 def test_parse_accepts_fences_and_reports_errors():
