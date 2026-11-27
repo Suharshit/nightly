@@ -42,7 +42,7 @@ export const api = {
   me: () => call<Me>("/me"),
   deleteMe: () => call<{ deleted: boolean }>("/me", { method: "DELETE" }),
   stats: () => call<Stats>("/stats"),
-  feed: () => call<Matches>("/matches?limit=5"),
+  feed: () => call<Matches>("/matches?limit=10"),
   newSinceYesterday: () => call<Matches>("/matches?limit=3&new=true"),
   search: (q: string) => call<Matches>(`/matches?limit=5&q=${encodeURIComponent(q)}`),
   chat: (message: string) =>
@@ -54,6 +54,8 @@ export const api = {
   },
   setPrefs: (prefs: Partial<Me["prefs"]>) =>
     call<{ prefs: Me["prefs"] }>("/prefs", { method: "PATCH", body: JSON.stringify(prefs) }),
+  reportBug: (body: { message: string; page?: string; email?: string }) =>
+    call<{ id: number }>("/bugs", { method: "POST", body: JSON.stringify(body) }),
   feedback: (job_id: number, action: "like" | "dislike" | "apply_click" | "share",
              reason?: DislikeReason) =>
     call<{ ok: boolean }>("/feedback", {

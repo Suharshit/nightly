@@ -49,7 +49,7 @@ export default function Chat() {
   const chips = !messages.length ? STARTERS : last?.role === "assistant" ? last.chips ?? [] : [];
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col px-4 pt-4">
       <Nav />
       <div className="flex flex-1 flex-col gap-3 pb-4">
         {!messages.length && (
@@ -57,7 +57,7 @@ export default function Chat() {
         )}
         {messages.map((m, i) => (
           <div key={i} className={m.role === "user" ? "self-end max-w-[85%]" : "flex flex-col gap-3"}>
-            <p className={`rounded-2xl px-4 py-2.5 text-sm ${m.role === "user" ? "bg-primary text-on-primary" : "bg-card"}`}>
+            <p className={`border border-text px-4 py-2.5 text-sm ${m.role === "user" ? "bg-primary text-on-primary" : "bg-card"}`}>
               {m.text}
             </p>
             {m.jobs?.map((j) => <JobCard key={j.id} job={j} />)}
@@ -77,18 +77,18 @@ export default function Chat() {
           <div className="mb-2 flex gap-2 overflow-x-auto">
             {chips.map((c) => (
               <button key={c} onClick={() => send(c)}
-                      className="shrink-0 rounded-full border border-line px-3 py-1.5 text-sm">
+                      className="btn shrink-0 px-3 py-1.5">
                 {c}
               </button>
             ))}
           </div>
         )}
-        <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex gap-2">
+        <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex">
           <input value={input} onChange={(e) => setInput(e.target.value)} maxLength={500}
                  placeholder="e.g. remote python internships"
-                 className="min-w-0 flex-1 rounded-full border border-line bg-card px-4 py-3 text-sm placeholder:text-muted" />
+                 aria-label="Message" className="field flex-1 border-r-0" />
           <button disabled={busy || !input.trim()}
-                  className="rounded-full bg-primary px-4 py-3 text-sm font-medium text-on-primary disabled:opacity-40">
+                  className="btn btn-primary">
             Send
           </button>
         </form>

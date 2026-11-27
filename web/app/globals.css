@@ -37,3 +37,27 @@ body {
   outline: 2px solid rgb(var(--accent));
   outline-offset: 2px;
 }
+
+/* Sharp-box UI (owner's reference, 28 Nov): square corners, 1px outlines in the text colour,
+   brand tokens only. Pages use these instead of rounded pills. */
+@layer components {
+  .box {
+    @apply border border-text bg-card;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 border border-text px-4 py-2.5 text-sm font-medium
+      transition-colors hover:bg-card disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply bg-primary text-on-primary hover:bg-primary/90;
+  }
+  .chip {
+    @apply inline-flex items-center border border-text px-2 py-0.5 text-xs;
+  }
+  .field {
+    @apply w-full min-w-0 border border-text bg-bg px-3 py-2.5 text-sm placeholder:text-muted;
+  }
+  .page {
+    @apply flex flex-col px-4 py-5;
+  }
+}

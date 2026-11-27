@@ -12,7 +12,7 @@ const num = (x: number | null) => (x === null ? "–" : String(Math.round(x * 10
 
 function Table({ title, rows }: { title: string; rows: [string, string | number][] }) {
   return (
-    <section className="rounded-2xl bg-card p-4">
+    <section className="box p-4">
       <h2 className="mb-2 font-display text-base font-medium">{title}</h2>
       <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 text-sm">
         {rows.map(([k, v]) => (
@@ -39,13 +39,13 @@ export default function StatsPage() {
   }, [session]);
 
   if (session === undefined) return null;
-  if (error) return <p className="text-sm text-muted">{error}</p>;
-  if (!stats) return <p className="text-sm text-muted">Counting…</p>;
+  if (error) return <p className="page text-sm text-muted">{error}</p>;
+  if (!stats) return <p className="page text-sm text-muted">Counting…</p>;
 
   const { users, chat, feedback, jobs } = stats;
   const sources = Object.entries(users.by_source);
   return (
-    <div className="flex flex-col gap-3 pb-6">
+    <div className="page gap-3 pb-6">
       <h1 className="font-display text-xl font-medium">Stats</h1>
       <p className="text-xs text-muted">Excludes {stats.excludes}.</p>
       <Table title="Users" rows={[
@@ -62,9 +62,9 @@ export default function StatsPage() {
         ["Answered by fallback model", pct(chat.fallback_rate)],
       ]} />
       <Table title="Feedback" rows={[
-        ["Jobs shown", feedback.shown], ["👍", feedback.likes], ["👎", feedback.dislikes],
+        ["Jobs shown", feedback.shown], ["Likes", feedback.likes], ["Not for me", feedback.dislikes],
         ["Apply clicks", feedback.apply_clicks], ["Shares", feedback.shares],
-        ["👍 rate (of shown)", pct(feedback.like_rate)],
+        ["Like rate (of shown)", pct(feedback.like_rate)],
         ["Apply rate (of shown)", pct(feedback.apply_rate)],
       ]} />
       <Table title="Jobs" rows={[
@@ -73,6 +73,30 @@ export default function StatsPage() {
         ["New in last ingest", jobs.last_ingest?.inserted ?? "–"],
         ["Expired in last ingest", jobs.last_ingest?.expired ?? "–"],
       ]} />
+      <section className="box">
+        <h2 className="flex items-baseline justify-between border-b border-text px-4 py-3 font-display text-base font-medium">
+          Bug reports
+          <span className="text-sm font-normal text-muted">{stats.bugs.open} open · {stats.bugs.total} total</span>
+        </h2>
+        {stats.bugs.latest.length === 0 ? (
+          <p className="px-4 py-3 text-sm text-muted">None yet.</p>
+        ) : (
+          <ol>
+            {stats.bugs.latest.map((b) => (
+              <li key={b.id} className="border-t border-text px-4 py-3 text-sm first:border-t-0">
+                <div className="mb-1 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+                  <span className="chip">#{b.id}</span>
+                  <span className={`chip ${b.status === "open" ? "bg-primary text-on-primary" : ""}`}>{b.status}</span>
+                  <span>{new Date(b.created_at).toLocaleString()}</span>
+                  {b.page && <span>· {b.page}</span>}
+                </div>
+                <p className="whitespace-pre-wrap break-words">{b.message}</p>
+                {b.email && <p className="mt-1 text-xs text-muted">{b.email}</p>}
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
     </div>
   );
 }

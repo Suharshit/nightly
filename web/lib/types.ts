@@ -44,8 +44,12 @@ export type Stats = {
               shares: number; like_rate: Rate; apply_rate: Rate };
   jobs: { active: number; companies: number;
           last_ingest: { started_at: string; inserted: number; expired: number } | null };
+  bugs: { total: number; open: number; latest: Bug[] };
   excludes: string;
 };
+
+export type Bug = { id: number; created_at: string; page: string | null; message: string;
+                    email: string | null; status: "open" | "fixed" | "wontfix" };
 
 export type Level = "student" | "fresher" | "junior";
 export type DislikeReason = "too_senior" | "wrong_location" | "not_interested";

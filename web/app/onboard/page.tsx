@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { api } from "@/lib/api";
 import type { Level } from "@/lib/types";
@@ -19,7 +19,7 @@ const LEVELS: { value: Level; label: string }[] = [
 function Chip({ on, children, onClick }: { on: boolean; children: React.ReactNode; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} aria-pressed={on}
-            className={`rounded-full border px-3 py-1.5 text-sm ${on ? "border-accent bg-card" : "border-line"}`}>
+            className={`btn px-3 py-1.5 ${on ? "btn-primary" : ""}`}>
       {children}
     </button>
   );
@@ -41,6 +41,18 @@ export default function Onboard() {
   const [level, setLevel] = useState<Level | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Editing later: start from the saved resume and preferences instead of a blank form.
+  useEffect(() => {
+    if (!session) return;
+    api.me().then((me) => {
+      if (me.has_resume) setSkills(me.resume_skills);
+      setRoles(me.prefs.roles ?? []);
+      setCities(me.prefs.cities ?? []);
+      setRemote(!!me.prefs.remote);
+      if (me.prefs.level) setLevel(me.prefs.level as Level);
+    }, () => {});
+  }, [session]);
 
   async function upload(f: File) {
     setFile(f);
@@ -75,14 +87,14 @@ export default function Onboard() {
   const ready = skills !== null && level !== null && (cities.length > 0 || remote);
 
   return (
-    <div className="flex flex-col gap-7">
+    <div className="page gap-7">
       <h1 className="font-display text-2xl font-medium">Set up your matches</h1>
 
       <section>
         <h2 className="mb-2 text-sm font-medium">1. Your resume (PDF)</h2>
-        <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-dashed border-line bg-card px-4 py-4">
+        <label className="box flex cursor-pointer items-center justify-between border-dashed px-4 py-4">
           <span className="truncate text-sm">
-            {busy && file && !skills ? "Reading your resume…" : file ? file.name : "Choose a PDF"}
+            {busy && file && !skills ? "Reading your resume…" : file ? file.name : skills ? "Resume on file" : "Choose a PDF"}
           </span>
           <span className="text-sm text-accent">{skills ? "Change" : "Upload"}</span>
           <input type="file" accept="application/pdf" className="hidden"
@@ -95,7 +107,7 @@ export default function Onboard() {
         )}
         <p className="mt-2 text-xs text-muted">
           We keep only your resume&apos;s text, to match you with jobs, and never share it.
-          Delete it any time from Matches. <Link href="/privacy" className="underline">Privacy</Link>
+          Delete it any time from the ••• menu. <Link href="/privacy" className="underline">Privacy</Link>
         </p>
       </section>
 
@@ -123,7 +135,7 @@ export default function Onboard() {
 
       {error && <p className="text-sm text-muted">{error}</p>}
       <button onClick={finish} disabled={!ready || busy}
-              className="rounded-full bg-primary px-4 py-3 font-medium text-on-primary disabled:opacity-40">
+              className="btn btn-primary py-3">
         {busy && skills ? "Saving…" : "Show my matches"}
       </button>
     </div>

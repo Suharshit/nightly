@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -66,63 +67,79 @@ export default function Landing() {
     if (error) setError(error.message);
   }
 
-  if (session) return <p className="text-muted">Signing you in…</p>;
+  if (session) return <p className="page text-muted">Signing you in…</p>;
 
+  const facts = [["Every night", "new jobs"], ["Fresher", "filters"], ["A reason", "for each match"]];
   return (
-    <div className="flex flex-1 flex-col justify-center gap-8 pb-10">
-      {deleted && (
-        <p role="status" className="rounded-2xl bg-card px-4 py-3 text-sm">
-          Your account and all your data are deleted.
-        </p>
-      )}
-      <section>
-        <div className="mb-6 text-text"><Mark size={48} /></div>
-        <h1 className="font-display text-3xl font-medium leading-tight tracking-tight">
-          Wake up to 3 startup jobs worth applying for.
-        </h1>
-        <p className="mt-3 text-muted">
-          nightly reads startup job boards every night and matches them to your resume.
-          Fresher-friendly filters, a reason for every match, free.
-        </p>
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <button onClick={google}
-                className="rounded-full bg-primary px-4 py-3 font-medium text-on-primary">
-          Continue with Google
-        </button>
-
-        <div className="flex items-center gap-3 text-xs text-muted">
-          <span className="h-px flex-1 bg-line" /> or use your email <span className="h-px flex-1 bg-line" />
-        </div>
-
-        {step === "email" ? (
-          <form onSubmit={sendCode} className="flex gap-2">
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                   placeholder="you@college.edu" autoComplete="email"
-                   className="min-w-0 flex-1 rounded-full border border-line bg-card px-4 py-3 placeholder:text-muted" />
-            <button disabled={busy} className="rounded-full border border-line px-4 py-3 font-medium">
-              {busy ? "…" : "Send code"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={verify} className="flex flex-col gap-2">
-            <p className="text-sm text-muted">We sent a 6-digit code to {email}.</p>
-            <div className="flex gap-2">
-              <input inputMode="numeric" autoComplete="one-time-code" required value={code}
-                     onChange={(e) => setCode(e.target.value)} placeholder="123456" maxLength={6}
-                     className="min-w-0 flex-1 rounded-full border border-line bg-card px-4 py-3 tracking-widest placeholder:text-muted" />
-              <button disabled={busy} className="rounded-full border border-line px-4 py-3 font-medium">
-                {busy ? "…" : "Verify"}
-              </button>
-            </div>
-            <button type="button" onClick={() => setStep("email")} className="self-start text-sm text-muted">
-              Use a different email
-            </button>
-          </form>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex flex-1 flex-col gap-4 px-4 py-4">
+        {deleted && (
+          <p role="status" className="box px-4 py-3 text-sm">
+            Your account and all your data are deleted.
+          </p>
         )}
-        {error && <p className="text-sm text-muted">{error}</p>}
-      </section>
+        <section className="box flex flex-col">
+          <div className="flex items-center justify-between border-b border-text px-4 py-2 text-xs text-muted">
+            <span>Startup jobs for Indian students and freshers</span>
+            <span>Free</span>
+          </div>
+          <div className="px-4 py-6">
+            <div className="mb-5 text-text"><Mark size={44} /></div>
+            <h1 className="font-display text-3xl font-medium leading-tight tracking-tight">
+              Wake up to a short list of jobs you can actually apply for.
+            </h1>
+            <p className="mt-3 text-sm text-muted">
+              nightly reads startup job boards every night and matches them to your resume,
+              one job at a time.
+            </p>
+          </div>
+          <dl className="grid grid-cols-3 border-t border-text text-sm">
+            {facts.map(([a, b], i) => (
+              <div key={a} className={`px-3 py-3 ${i ? "border-l border-text" : ""}`}>
+                <dt className="font-medium">{a}</dt>
+                <dd className="text-xs text-muted">{b}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section className="box flex flex-col gap-3 p-4">
+          <h2 className="font-display text-base font-medium">Sign in</h2>
+          <button onClick={google} className="btn btn-primary w-full">Continue with Google</button>
+
+          <div className="flex items-center gap-3 text-xs text-muted">
+            <span className="h-px flex-1 bg-text/40" /> or use your email <span className="h-px flex-1 bg-text/40" />
+          </div>
+
+          {step === "email" ? (
+            <form onSubmit={sendCode} className="flex">
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                     placeholder="you@college.edu" autoComplete="email" aria-label="Email"
+                     className="field flex-1 border-r-0" />
+              <button disabled={busy} className="btn">{busy ? "…" : "Send code"}</button>
+            </form>
+          ) : (
+            <form onSubmit={verify} className="flex flex-col gap-2">
+              <p className="text-sm text-muted">We sent a 6-digit code to {email}.</p>
+              <div className="flex">
+                <input inputMode="numeric" autoComplete="one-time-code" required value={code}
+                       onChange={(e) => setCode(e.target.value)} placeholder="123456" maxLength={6}
+                       aria-label="Code" className="field flex-1 border-r-0 tracking-widest" />
+                <button disabled={busy} className="btn">{busy ? "…" : "Verify"}</button>
+              </div>
+              <button type="button" onClick={() => setStep("email")}
+                      className="self-start text-sm text-muted underline">
+                Use a different email
+              </button>
+            </form>
+          )}
+          {error && <p className="text-sm text-muted">{error}</p>}
+        </section>
+      </div>
+      <footer className="flex justify-center gap-4 border-t border-text px-4 py-3 text-xs text-muted">
+        <Link href="/privacy" className="underline">Privacy</Link>
+        <Link href="/bug" className="underline">Report a bug</Link>
+      </footer>
     </div>
   );
 }

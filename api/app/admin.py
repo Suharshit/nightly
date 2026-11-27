@@ -70,6 +70,11 @@ STATS_SQL = {
         select count(*) filter (where j.is_active),
                count(distinct j.company_id) filter (where j.is_active)
         from jobs j""",
+    "bugs": """
+        select id, created_at, page, message, email, status from bug_reports
+        order by created_at desc limit 50""",
+    "bug_counts": """
+        select count(*), count(*) filter (where status = 'open') from bug_reports""",
     "ingest": """
         select started_at, inserted, expired from ingest_runs
         order by started_at desc limit 1""",
@@ -101,6 +106,10 @@ def stats(cur) -> dict:
     shown, likes, dislikes, applies, shares = one("feedback")
     active_jobs, companies = one("jobs")
     ingest = one("ingest")
+    bugs_total, bugs_open = one("bug_counts")
+    cur.execute(STATS_SQL["bugs"], p)
+    bugs = [{"id": i, "created_at": t.isoformat(), "page": pg, "message": m, "email": e,
+             "status": st} for i, t, pg, m, e, st in cur.fetchall()]
     return {
         "users": {"signups": signups, "signups_24h": day, "signups_7d": week,
                   "with_resume": resumes, "active_7d": active, "by_source": sources},
@@ -116,5 +125,6 @@ def stats(cur) -> dict:
                  "last_ingest": None if ingest is None else {
                      "started_at": ingest[0].isoformat(), "inserted": ingest[1],
                      "expired": ingest[2]}},
+        "bugs": {"total": bugs_total, "open": bugs_open, "latest": bugs},
         "excludes": "admin accounts and deleted accounts",
     }

@@ -17,10 +17,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 /** Plain-language privacy policy. Keep it in step with what the code actually stores. */
 export default function Privacy() {
   return (
-    <article className="flex flex-col gap-6 pb-10">
+    <article className="page gap-6 pb-10">
       <header>
         <h1 className="font-display text-2xl font-medium tracking-tight">Privacy policy</h1>
-        <p className="mt-1 text-sm text-muted">Last updated 27 November 2026 (delete button added)</p>
+        <p className="mt-1 text-sm text-muted">Last updated 28 November 2026 (bug reports added)</p>
       </header>
 
       <p className="text-sm leading-relaxed text-muted">
@@ -42,6 +42,9 @@ export default function Privacy() {
             liked, disliked, opened or shared, with any reason you gave.</li>
           <li><span className="text-text">Chat:</span> your messages and the replies, plus timing and
             error logs for each reply.</li>
+          <li><span className="text-text">Bug reports:</span> what you write on the Report a bug
+            page, where it happened, your screen size and browser name, and an email only if you
+            give one. Delete my data removes the email and the link to your account.</li>
           <li><span className="text-text">On your device:</span> your theme choice and the link you
             arrived from (for example a WhatsApp share), kept in your browser&apos;s local storage.</li>
         </ul>
@@ -71,8 +74,8 @@ export default function Privacy() {
 
       <Section title="Your choices">
         <p>You can change your preferences at any time. To delete your account and everything
-          linked to it, tap <span className="text-text">Delete my data</span> at the bottom of
-          your Matches page. It removes your account, resume, preferences, activity, chat
+          linked to it, open the <span className="text-text">•••</span> menu and tap{" "}
+          <span className="text-text">Delete my data</span>. It removes your account, resume, preferences, activity, chat
           history and chat logs straight away.</p>
         <p>For a copy of your data, open an issue on our{" "}
           <a href={`${REPO}/issues`} className="text-text underline">GitHub page</a> and we will

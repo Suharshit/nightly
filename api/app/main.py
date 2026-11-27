@@ -272,6 +272,8 @@ def me(request: Request, user: Annotated[dict, Depends(current_user)]) -> Me:
 # foreign key (it keeps metrics), so its rows for this user go explicitly.
 DELETE_USER = [
     "delete from agent_logs where user_id = %(id)s",
+    # Bug reports stay for the owner, but lose the email and the link to the account.
+    "update bug_reports set email = null, user_id = null where user_id = %(id)s",
     "delete from auth.users where id = %(id)s",
 ]
 
@@ -342,3 +344,27 @@ def chat(request: Request, body: ChatIn,
                    json_valid=turn.json_valid,
                    took_ms=int((time.perf_counter() - started) * 1000),
                    chats_left=max(0, CHAT_DAILY_LIMIT - used - 1))
+
+
+class BugIn(BaseModel):
+    message: str = Field(min_length=5, max_length=2000)
+    page: str | None = Field(default=None, max_length=200)
+    email: str | None = Field(default=None, max_length=200,
+                              pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+SAVE_BUG = """insert into bug_reports (user_id, email, page, message, user_agent)
+values (%s, %s, %s, %s, %s) returning id"""
+
+
+@app.post("/bugs")
+def report_bug(request: Request, body: BugIn,
+               user: Annotated[dict | None, Depends(optional_user)]) -> dict:
+    """A bug report from the app's /bug page. Signing in is optional; the owner reads these
+    on /stats. Rate-limited per visitor (limits.RATES)."""
+    agent = (request.headers.get("user-agent") or "")[:300] or None
+    with request.app.state.pool.connection() as conn, conn.cursor() as cur:
+        cur.execute(SAVE_BUG, (user["id"] if user else None, body.email or None,
+                               body.page, body.message.strip(), agent))
+        (bug_id,) = cur.fetchone()
+    return {"id": bug_id}
