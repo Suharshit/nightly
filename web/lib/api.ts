@@ -3,7 +3,10 @@
 import { accessToken } from "@/lib/supabase";
 import type { ChatReply, DislikeReason, Matches, Me } from "@/lib/types";
 
-const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+// Only `next dev` falls back to a local API. A production build without NEXT_PUBLIC_API_URL
+// must not call localhost: that would reach into the visitor's own machine.
+const API = (process.env.NEXT_PUBLIC_API_URL
+  || (process.env.NODE_ENV === "development" ? "http://localhost:8000" : "")).replace(/\/$/, "");
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -12,6 +15,7 @@ export class ApiError extends Error {
 }
 
 async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
+  if (!API) throw new ApiError(0, "nightly's server isn't switched on yet. Please check back soon.");
   const token = await accessToken();
   const headers = new Headers(init.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
