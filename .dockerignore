@@ -1,0 +1,16 @@
+# Keep secrets, data and build output out of the image (deploy/hf-space/Dockerfile).
+.env
+.env.*
+**/.env*.local
+.venv
+.git
+**/__pycache__
+**/*.pyc
+web
+data
+eval
+db
+docs
+tests
+scripts
+.claude

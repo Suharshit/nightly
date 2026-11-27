@@ -1,0 +1,70 @@
+name: deploy-api
+
+# Builds the API image on every change to it; on main, uploads it to the Hugging Face Space,
+# which rebuilds and restarts. Needs the HF_TOKEN secret and the HF_SPACE variable
+# ("owner/space-name"); without them the upload step is skipped.
+on:
+  push:
+    branches: [main]
+    paths: ["api/**", "worker/**", "deploy/hf-space/**", ".dockerignore", ".github/workflows/deploy-api.yml"]
+  pull_request:
+    paths: ["api/**", "worker/**", "deploy/hf-space/**", ".dockerignore", ".github/workflows/deploy-api.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-api-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build the image
+        run: docker build -f deploy/hf-space/Dockerfile -t nightly-api .
+      - name: Start it and check that it imports and loads the models
+        run: |
+          # Fake but well-formed settings: startup opens the pool lazily and only fails on use.
+          docker run -d --name api -p 7860:7860 \
+            -e DATABASE_URL=postgresql://x:x@127.0.0.1:1/x \
+            -e SUPABASE_URL=https://example.supabase.co -e SUPABASE_ANON_KEY=x \
+            nightly-api
+          for i in $(seq 1 60); do
+            if docker logs api 2>&1 | grep -q "Application startup complete"; then echo "started"; exit 0; fi
+            if [ "$(docker inspect -f '{{.State.Running}}' api)" != "true" ]; then break; fi
+            sleep 2
+          done
+          docker logs api; exit 1
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_SPACE: ${{ vars.HF_SPACE }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Upload to the Space
+        if: env.HF_TOKEN != '' && env.HF_SPACE != ''
+        run: |
+          pip install -q "huggingface_hub>=0.26"
+          mkdir space
+          cp deploy/hf-space/Dockerfile deploy/hf-space/README.md .dockerignore space/
+          rsync -a --exclude '__pycache__' api worker space/
+          python - <<'EOF'
+          import os
+          from huggingface_hub import HfApi
+          HfApi(token=os.environ["HF_TOKEN"]).upload_folder(
+              repo_id=os.environ["HF_SPACE"], repo_type="space", folder_path="space",
+              commit_message=f"Deploy {os.environ['GITHUB_SHA'][:7]}",
+              delete_patterns=["api/**", "worker/**"])  # drop files removed from the repo
+          EOF
+      - name: Say why nothing was uploaded
+        if: env.HF_TOKEN == '' || env.HF_SPACE == ''
+        run: echo "::warning::Set the HF_TOKEN secret and the HF_SPACE variable to deploy."
