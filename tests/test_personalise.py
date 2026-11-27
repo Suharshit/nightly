@@ -197,3 +197,14 @@ def test_routes_need_sign_in_and_validate(api):
     assert c.patch("/prefs", json={"cities": ["Pune"]}).status_code == 401
     assert c.get("/matches", params={"q": "go"},
                  headers={"Authorization": "Bearer nope"}).status_code == 401
+
+
+def test_query_searches_can_skip_freshness_and_diversity():
+    # Three jobs from one company ranked above an older-ranked job from another company.
+    jobs = [{"id": i, "company": "Acme" if i < 3 else "Beta", "rerank_score": 0.9 - i / 10,
+             "seen_at": NOW} for i in range(4)]
+    kept = pz.personalise(jobs, None, NOW)
+    assert [j["id"] for j in kept][:3] == [0, 1, 3]            # diversity moves Beta up
+    plain = pz.personalise(jobs, None, NOW, use_fresh=False, use_diversity=False)
+    assert [j["id"] for j in plain] == [0, 1, 2, 3]            # pure rerank order
+    assert all(j["parts"]["fresh"] == 0 for j in plain)
