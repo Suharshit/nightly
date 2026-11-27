@@ -123,6 +123,45 @@ def test_matches_infers_level_and_passes_filters(client):
     assert seen["qvec"].startswith("[0.000000")
 
 
+def test_matches_new_passes_new_only(client):
+    c, seen = client
+    assert c.get("/matches", params={"q": "python"}).status_code == 200
+    assert seen["f"].new_only is False
+    assert c.get("/matches", params={"q": "python", "new": "true"}).status_code == 200
+    assert seen["f"].new_only is True
+
+
+def test_where_new_only_keeps_last_runs_jobs():
+    sql, _ = hybrid.where(hybrid.Filters(new_only=True))
+    assert hybrid.NEW_SINCE_LAST_RUN in sql
+    assert hybrid.NEW_SINCE_LAST_RUN not in hybrid.where(hybrid.Filters())[0]
+
+
+def test_new_only_returns_jobs_first_seen_in_the_latest_run(cur):
+    cur.execute("insert into companies (name, ats, slug) values ('ZZ New Co', 'greenhouse', "
+                "'zz-new') returning id")
+    co = cur.fetchone()[0]
+    # Two runs in the future, so real rows in the table never count as "new" here.
+    cur.execute("insert into ingest_runs (started_at, finished_at) values "
+                "(now() + interval '1 day', now() + interval '1 day'), "
+                "(now() + interval '2 days', now() + interval '2 days')")
+
+    def job(ext, first_seen):
+        cur.execute("""insert into jobs (company_id, source, external_id, title, embedding,
+                         description_text, first_seen)
+                       values (%s, 'greenhouse', %s, 'Zzqnew Backend Engineer', %s::vector,
+                               'zzqnew', now() + %s::interval) returning id""",
+                    (co, ext, axis(9), first_seen))
+        return cur.fetchone()[0]
+
+    old = job("zz-new-1", "1 day 1 hour")       # before the latest run
+    new = job("zz-new-2", "2 days 1 hour")      # added by the latest run
+    every = hybrid.search(cur, "zzqnew backend", axis(9), hybrid.Filters())
+    fresh = hybrid.search(cur, "zzqnew backend", axis(9), hybrid.Filters(new_only=True))
+    assert {old, new} <= {j["id"] for j in every}
+    assert [j["id"] for j in fresh] == [new]
+
+
 def test_matches_validates_input(client):
     c, _ = client
     assert c.get("/matches", params={"q": ""}).status_code == 400  # no query, no resume

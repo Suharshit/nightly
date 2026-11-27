@@ -43,6 +43,7 @@ export const api = {
   deleteMe: () => call<{ deleted: boolean }>("/me", { method: "DELETE" }),
   stats: () => call<Stats>("/stats"),
   feed: () => call<Matches>("/matches?limit=5"),
+  newSinceYesterday: () => call<Matches>("/matches?limit=3&new=true"),
   search: (q: string) => call<Matches>(`/matches?limit=5&q=${encodeURIComponent(q)}`),
   chat: (message: string) =>
     call<ChatReply>("/chat", { method: "POST", body: JSON.stringify({ message }) }),

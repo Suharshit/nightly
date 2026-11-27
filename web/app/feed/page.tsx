@@ -15,6 +15,7 @@ export default function Feed() {
   const router = useRouter();
   const session = useSession();
   const [jobs, setJobs] = useState<Job[] | null>(null);
+  const [fresh, setFresh] = useState<Job[]>([]);   // "New since yesterday"
   const [error, setError] = useState<string | null>(null);
   const [slow, setSlow] = useState(false);
 
@@ -23,7 +24,14 @@ export default function Feed() {
     setJobs(null);
     const timer = setTimeout(() => setSlow(true), 3000);
     try {
-      setJobs((await api.feed()).jobs);
+      // The new-jobs section is a bonus: if it fails, the main feed still shows.
+      const [feed, latest] = await Promise.all([
+        api.feed(), api.newSinceYesterday().catch(() => null),
+      ]);
+      const freshJobs = latest?.jobs ?? [];
+      const freshIds = new Set(freshJobs.map((j) => j.id));
+      setFresh(freshJobs);
+      setJobs(feed.jobs.filter((j) => !freshIds.has(j.id)));
     } catch (e) {
       if (e instanceof ApiError && e.status === 400) router.replace("/onboard"); // no resume yet
       else setError((e as Error).message);
@@ -54,12 +62,22 @@ export default function Feed() {
         <p className="text-sm text-muted">
           {slow ? "Waking up the server, this can take up to a minute the first time…" : "Finding jobs…"}
         </p>
-      ) : jobs.length === 0 ? (
+      ) : jobs.length === 0 && fresh.length === 0 ? (
         <p className="rounded-2xl bg-card p-4 text-sm">
           Nothing new right now. Try the chat to loosen a filter, like &ldquo;remote is fine too&rdquo;.
         </p>
       ) : (
         <div className="flex flex-col gap-3">
+          {fresh.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <h2 className="flex items-center gap-2 text-sm font-medium">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-accent" />
+                New since yesterday
+              </h2>
+              {fresh.map((j) => <JobCard key={j.id} job={j} />)}
+              {jobs.length > 0 && <h2 className="mt-2 text-sm font-medium">More matches</h2>}
+            </section>
+          )}
           {jobs.map((j) => <JobCard key={j.id} job={j} />)}
         </div>
       )}

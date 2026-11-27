@@ -39,6 +39,11 @@ class Filters:
     cities: list[str] = field(default_factory=list)
     remote: bool = False          # with cities: those cities OR remote; alone: remote only
     exclude_ids: list[int] = field(default_factory=list)
+    new_only: bool = False        # only jobs first seen in the latest nightly ingest run
+
+
+# Jobs the latest ingest run added: first_seen is set when a job is first inserted.
+NEW_SINCE_LAST_RUN = "j.first_seen >= (select max(started_at) from ingest_runs)"
 
 
 def where(f: Filters) -> tuple[str, dict]:
@@ -61,6 +66,8 @@ def where(f: Filters) -> tuple[str, dict]:
     if f.exclude_ids:
         sql.append("not (j.id = any(%(exclude)s))")
         params["exclude"] = f.exclude_ids
+    if f.new_only:
+        sql.append(NEW_SINCE_LAST_RUN)
     return " and ".join(sql), params
 
 
