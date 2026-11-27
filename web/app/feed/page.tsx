@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { ArrowUpRight, ThumbDown, ThumbUp } from "@/components/Icons";
 import { JobDetails, REASONS, sendFeedback } from "@/components/JobCard";
 import { ApiError, api } from "@/lib/api";
 import type { DislikeReason, Job } from "@/lib/types";
@@ -13,7 +14,7 @@ type Card = Job & { fresh?: boolean };
 type Mark = "liked" | "hidden";
 
 /** Home: one job at a time. Swipe up (phone) or scroll down (PC) for the next, back for the
- *  previous; 👍, 👎 and Apply act on the job on screen. Built from the resume and saved
+ *  previous; like, not-for-me and Apply act on the job on screen. Built from the resume and saved
  *  preferences, with "New since yesterday" jobs first. */
 export default function Feed() {
   const router = useRouter();
@@ -190,15 +191,21 @@ export default function Feed() {
           <button aria-label="Like" disabled={atEnd || !!(job && marks[job.id])}
                   aria-pressed={!!job && marks[job.id] === "liked"}
                   onClick={() => act("liked")}
-                  className="py-4 text-lg hover:bg-card disabled:opacity-40">👍</button>
+                  title="Like"
+                  className={`flex items-center justify-center py-4 ${job && marks[job.id] === "liked" ? "bg-primary text-on-primary" : "hover:bg-card disabled:opacity-40"}`}>
+            <ThumbUp size={22} filled={!!job && marks[job.id] === "liked"} />
+          </button>
           <button aria-label="Not for me" disabled={atEnd || !!(job && marks[job.id])}
                   onClick={() => setAsking(true)}
-                  className="border-l border-text py-4 text-lg hover:bg-card disabled:opacity-40">👎</button>
+                  title="Not for me"
+                  className="flex items-center justify-center border-l border-text py-4 hover:bg-card disabled:opacity-40">
+            <ThumbDown size={22} />
+          </button>
           {job?.apply_url && !atEnd ? (
             <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
                onClick={() => { sendFeedback(job, "apply_click").catch(() => {}); }}
-               className="flex items-center justify-center border-l border-text bg-primary font-medium text-on-primary">
-              Apply
+               className="flex items-center justify-center gap-1.5 border-l border-text bg-primary font-medium text-on-primary">
+              Apply <ArrowUpRight size={18} />
             </a>
           ) : (
             <span className="flex items-center justify-center border-l border-text text-sm text-muted">

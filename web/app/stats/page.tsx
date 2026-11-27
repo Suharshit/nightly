@@ -62,9 +62,9 @@ export default function StatsPage() {
         ["Answered by fallback model", pct(chat.fallback_rate)],
       ]} />
       <Table title="Feedback" rows={[
-        ["Jobs shown", feedback.shown], ["👍", feedback.likes], ["👎", feedback.dislikes],
+        ["Jobs shown", feedback.shown], ["Likes", feedback.likes], ["Not for me", feedback.dislikes],
         ["Apply clicks", feedback.apply_clicks], ["Shares", feedback.shares],
-        ["👍 rate (of shown)", pct(feedback.like_rate)],
+        ["Like rate (of shown)", pct(feedback.like_rate)],
         ["Apply rate (of shown)", pct(feedback.apply_rate)],
       ]} />
       <Table title="Jobs" rows={[

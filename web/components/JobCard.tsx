@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { ArrowUpRight, Share, ThumbDown, ThumbUp } from "@/components/Icons";
 import { api } from "@/lib/api";
 import type { DislikeReason, Job } from "@/lib/types";
 
@@ -101,15 +102,15 @@ export function JobDetails({ job, badge, fill = false }:
       <div className="mt-auto border-t border-text px-4 py-2.5">
         <a href={shareLink(job)} target="_blank" rel="noopener noreferrer"
            onClick={() => { sendFeedback(job, "share").catch(() => {}); }}
-           className="text-sm underline underline-offset-4">
-          Share on WhatsApp
+           className="inline-flex items-center gap-1.5 text-sm underline underline-offset-4">
+          <Share size={16} /> Share on WhatsApp
         </a>
       </div>
     </article>
   );
 }
 
-/** A compact card with its own 👍 / 👎 / Apply, for chat replies. */
+/** A compact card with its own like / not-for-me / Apply, for chat replies. */
 export function JobCard({ job }: { job: Job }) {
   const [state, setState] = useState<"idle" | "liked" | "hidden">("idle");
   if (state === "hidden") {
@@ -120,16 +121,22 @@ export function JobCard({ job }: { job: Job }) {
       <JobDetails job={job} />
       <div className="grid grid-cols-[1fr_1fr_2fr] border-x border-b border-text">
         <button aria-label="Like" aria-pressed={state === "liked"}
-                className={`py-2.5 ${state === "liked" ? "bg-primary text-on-primary" : "hover:bg-card"}`}
-                onClick={() => sendFeedback(job, "like").then(() => setState("liked"), () => {})}>👍</button>
-        <button aria-label="Not for me" className="border-l border-text py-2.5 hover:bg-card"
+                title="Like"
+                className={`flex items-center justify-center py-2.5 ${state === "liked" ? "bg-primary text-on-primary" : "hover:bg-card"}`}
+                onClick={() => sendFeedback(job, "like").then(() => setState("liked"), () => {})}>
+          <ThumbUp size={18} filled={state === "liked"} />
+        </button>
+        <button aria-label="Not for me" title="Not for me"
+                className="flex items-center justify-center border-l border-text py-2.5 hover:bg-card"
                 onClick={() => sendFeedback(job, "dislike", "not_interested")
-                  .then(() => setState("hidden"), () => {})}>👎</button>
+                  .then(() => setState("hidden"), () => {})}>
+          <ThumbDown size={18} />
+        </button>
         {job.apply_url ? (
           <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
              onClick={() => { sendFeedback(job, "apply_click").catch(() => {}); }}
-             className="border-l border-text bg-primary py-2.5 text-center text-sm font-medium text-on-primary">
-            Apply
+             className="flex items-center justify-center gap-1.5 border-l border-text bg-primary py-2.5 text-sm font-medium text-on-primary">
+            Apply <ArrowUpRight size={16} />
           </a>
         ) : <span className="border-l border-text" />}
       </div>
