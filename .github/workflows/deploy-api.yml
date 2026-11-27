@@ -27,14 +27,18 @@ jobs:
           python-version: "3.12"   # the Space's README pins 3.12.12 (ZeroGPU offers 3.10/3.12)
       - name: Assemble the Space folder
         run: bash deploy/hf-space/assemble.sh space
-      - name: Install Gradio and the requirements together, as the Space does
+      - name: Install the way the Space does
         working-directory: space
         run: |
           # The CPU build of the same torch version: CI has no GPU and the CUDA wheel is ~2 GB.
           torch=$(sed -n 's/^torch==//p' requirements.txt)
           pip install "torch==$torch" --index-url https://download.pytorch.org/whl/cpu
+          # The Space's own command (from its build log): requirements.txt copied alone to /tmp,
+          # installed in one go with Gradio's extras and the ZeroGPU `spaces` package.
           gradio=$(sed -n 's/^sdk_version: *//p' README.md)
-          pip install "gradio==$gradio" -r requirements.txt
+          cp requirements.txt /tmp/requirements.txt
+          pip install -r /tmp/requirements.txt "torch<=$torch" "gradio[oauth,mcp]==$gradio" \
+            "uvicorn>=0.14.0" "websockets>=10.4" spaces==0.52.1 requests
       - name: Start app.py and check the API answers
         working-directory: space
         env:
