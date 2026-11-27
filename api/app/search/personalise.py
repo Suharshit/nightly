@@ -114,6 +114,8 @@ def reason(job: dict, p: Profile | None, now: datetime) -> str:
         bits.append("Fresher-friendly")
     elif job.get("min_exp_years") is not None:
         bits.append(f"{job['min_exp_years']}+ yrs")
+    elif job.get("seniority") is None:
+        bits.append("Level not stated")   # say so rather than guess (owner, 28 Nov)
     if job.get("posted_at"):
         bits.append(_days_ago(job["posted_at"], now))
     return " · ".join(bits)

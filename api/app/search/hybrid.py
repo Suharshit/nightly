@@ -41,6 +41,10 @@ class Filters:
     remote: bool = False          # with cities: those cities OR remote; alone: remote only
     exclude_ids: list[int] = field(default_factory=list)
     new_only: bool = False        # only jobs first seen in the latest nightly ingest run
+    # With a level, hide jobs that state neither a seniority nor years. Off: on the eval it
+    # dropped 22 of the owner's 34 perfect level-query matches (NDCG@10 0.746 -> 0.418), so
+    # these jobs are shown with "Level not stated" in their reason instead.
+    hide_unknown_level: bool = False
 
 
 # Jobs the latest ingest run added: first_seen is set when a job is first inserted.
@@ -55,6 +59,8 @@ def where(f: Filters) -> tuple[str, dict]:
         allowed, max_years = LEVELS[f.level]
         sql.append("(j.seniority is null or j.seniority = any(%(seniorities)s))")
         sql.append("(j.min_exp_years is null or j.min_exp_years <= %(max_years)s)")
+        if f.hide_unknown_level:
+            sql.append("(j.seniority is not null or j.min_exp_years is not null)")
         params |= {"seniorities": list(allowed), "max_years": max_years}
     place = []
     if f.cities:

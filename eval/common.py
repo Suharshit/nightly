@@ -25,6 +25,8 @@ VARIANTS: dict[str, dict] = {
     # Searches with a query no longer use it (it scored lower); kept to show why.
     "+ freshness & diversity": {"use_fresh": True, "use_diversity": True},
     "as served (query)": {},  # what /matches does for a typed search today
+    # Tried 28 Nov and not served: level searches leave out jobs stating no level or years.
+    "as served, unknown level hidden": {"hide_unknown_level": True},
 }
 
 
