@@ -12,3 +12,17 @@
 
 Invented jobs = share of turns where the reply named a job no tool returned (the guardrail removed it before the user saw it). Latency includes waiting for Groq's free-tier limit of 8K tokens a minute: with no fallback model, a turn that hits it waits up to 20 s, so p50/p95 measure the free tier more than the model.
 <!-- agent-eval:end -->
+
+<!-- search-eval:start -->
+## Search
+
+Snapshot frozen 2026-11-25T18:33+00:00 (1798 active jobs). 50 queries, 1825 hand labels. Run 2026-11-27T15:10+00:00 by `python -m eval.run_search_eval`.
+
+| Variant | NDCG@10 | Recall@30 | MRR | judged@10 | p50 ms |
+| --- | --- | --- | --- | --- | --- |
+| keyword only | 0.564 | 0.721 | 0.797 | 1.000 | 102 |
+| vector only | 0.574 | 0.653 | 0.832 | 1.000 | 105 |
+| hybrid RRF | 0.633 | 0.861 | 0.882 | 1.000 | 116 |
+| hybrid + rerank | 0.689 | 0.867 | 0.882 | 1.000 | 634 |
+| + freshness & diversity | 0.611 | 0.878 | 0.820 | 0.996 | 617 |
+<!-- search-eval:end -->
