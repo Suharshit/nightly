@@ -11,10 +11,13 @@ from worker.embed import DIM
 
 @pytest.fixture(autouse=True)
 def _empty_profile_cache():
-    """The profile cache is process-wide; no test may see another test's profiles."""
+    """The profile cache and rate counters are process-wide; tests must not share them."""
+    from api.app import limits
     prof._profiles.clear()
+    limits._hits.clear()
     yield
     prof._profiles.clear()
+    limits._hits.clear()
 
 
 class FakeEmbedder:
