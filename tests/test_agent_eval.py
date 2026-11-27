@@ -101,7 +101,7 @@ def test_summary_and_table():
     assert row["tool_acc"] == 0.5 and row["arg_acc"] == 1.0 and row["arg_turns"] == 1
     assert row["json_valid"] == 0.5 and row["hallucinated"] == 0.5
     assert row["p50_ms"] == 2000 and row["p95_ms"] == 3000 and row["prompt_tokens"] == 1500
-    text = run_agent_eval.table([row])
+    text = run_agent_eval.table([row], "2026-11-27T00:00+00:00")
     assert "| m | 50% | 100% (1) | 50% | 50% | 2000 | 3000 | 1500 |" in text
 
 
@@ -117,3 +117,38 @@ def test_proposed_convos_have_no_expected_answers():
     assert len(cases) >= 30 and len({c["id"] for c in cases}) == len(cases)
     for c in cases:
         assert set(c) == {"id", "message", "prefs", "history"}
+
+
+def test_labeller_rejects_values_the_agent_cannot_send(monkeypatch, capsys):
+    answers = iter(["Internship", "Student", "", "", "python"])
+    monkeypatch.setattr("builtins.input", lambda prompt="": next(answers))
+    assert label_agent.ask_args("search_jobs") == {"seniority": "student", "skills": ["python"]}
+    assert "only send one of: student, fresher, junior" in capsys.readouterr().out
+
+
+def test_label_choices_match_the_tool_schemas():
+    from api.app.agent.tools import SCHEMAS
+    props = {s["function"]["name"]: s["function"]["parameters"]["properties"] for s in SCHEMAS}
+    for tool, fields in ac.KEY_ARGS.items():
+        for name, _, choices in fields:
+            assert name in props[tool]
+            if choices:
+                assert choices == props[tool][name]["enum"], (tool, name)
+
+
+def test_rescore_uses_saved_runs_and_current_labels(tmp_path, monkeypatch):
+    runs_f, labels_f, results_f = (tmp_path / n for n in ("runs.jsonl", "labels.jsonl", "r.md"))
+    runs_f.write_text(json.dumps({"id": "a1", "model": "m", "calls": [call("get_job", job_id=5)],
+                                  "json_valid": True, "dropped": [], "latency_ms": 900,
+                                  "usage": {"prompt_tokens": 10}}) + "\n", encoding="utf-8")
+    labels_f.write_text(json.dumps({"id": "a1", "tools": ["get_job"], "args": {}}) + "\n"
+                        + json.dumps({"id": "a1", "tools": [], "args": {}}) + "\n",
+                        encoding="utf-8")
+    monkeypatch.setattr(run_agent_eval, "RUNS", runs_f)
+    monkeypatch.setattr(run_agent_eval, "RESULTS", results_f)
+    monkeypatch.setattr(ac, "AGENT_LABELS", labels_f)
+    monkeypatch.setattr(run_agent_eval, "load_agent_labels", ac.load_agent_labels)
+    monkeypatch.setattr("sys.argv", ["run_agent_eval", "--rescore"])
+    run_agent_eval.main()
+    # The later label ("no tool") wins, so calling get_job now scores as wrong.
+    assert "| m | 0% | - | 100% | 0% | 900 | 900 | 10 |" in results_f.read_text(encoding="utf-8")

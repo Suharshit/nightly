@@ -16,6 +16,7 @@ from collections import Counter
 
 from eval.agent_common import (
     AGENT_LABELS,
+    HINTS,
     KEY_ARGS,
     TOOLS,
     load_agent_labels,
@@ -57,18 +58,25 @@ def ask_tools() -> list[str] | str:
 
 def ask_args(tool: str) -> dict:
     out = {}
-    for name, kind in KEY_ARGS[tool]:
-        hint = {"list": " (comma list)", "int": " (number)",
-                "value": " (text, comma list, or true/false)"}.get(kind, "")
+    for name, kind, choices in KEY_ARGS[tool]:
+        hint = " / ".join(choices) if choices else {"list": "comma list", "int": "number"}.get(
+            kind, "")
+        if name in HINTS:
+            hint = f"{hint}; {HINTS[name]}" if hint else HINTS[name]
         while True:
-            raw = input(f"  {tool}.{name}{hint} [Enter = don't check]: ")
+            raw = input(f"  {tool}.{name} ({hint}) [Enter = don't check]: ")
             if not raw.strip():
                 break
             try:
-                out[name] = parse_arg(kind, raw)
-                break
+                value = parse_arg(kind, raw)
             except ValueError:
                 print("  That is not a number.")
+                continue
+            if choices and str(value).lower() not in choices:
+                print(f"  The agent can only send one of: {', '.join(choices)}")
+                continue
+            out[name] = value.lower() if choices else value
+            break
     return out
 
 
