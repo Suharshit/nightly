@@ -14,6 +14,8 @@ try:  # Only installed on ZeroGPU. It must be imported before torch and gradio.
 except ImportError:
     spaces = None
 
+import os
+
 import gradio as gr
 import uvicorn
 
@@ -35,60 +37,11 @@ with gr.Blocks(title="nightly API") as ui:
 
 app = gr.mount_gradio_app(app, ui, path="/")
 
-PORT = 7860
-
-
-def _port_holder(port: int) -> str:
-    """Who listens on `port`, from /proc (Linux only). For the Space log when the port is taken."""
-    import glob
-    import os
-    inodes = set()
-    for table in ("/proc/net/tcp", "/proc/net/tcp6"):
-        try:
-            for row in open(table).read().splitlines()[1:]:
-                cols = row.split()
-                if int(cols[1].rsplit(":", 1)[1], 16) == port and cols[3] == "0A":  # LISTEN
-                    inodes.add(cols[9])
-        except OSError:
-            pass
-    holders = []
-    for fd in glob.glob("/proc/[0-9]*/fd/*"):
-        try:
-            target = os.readlink(fd)
-        except OSError:
-            continue
-        if target.startswith("socket:[") and target[8:-1] in inodes:
-            pid = fd.split("/")[2]
-            try:
-                cmd = open(f"/proc/{pid}/cmdline", "rb").read().replace(b"\0", b" ").decode()
-            except OSError:
-                cmd = "?"
-            holders.append(f"pid {pid}: {cmd.strip()[:200]}")
-    found = "; ".join(sorted(set(holders)))
-    return found or f"listening inodes {sorted(inodes)}, owner not visible"
-
-
-def _port_free(port: int) -> bool:
-    import socket
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        try:
-            s.bind(("0.0.0.0", port))
-            return True
-        except OSError:
-            return False
-
+# Listen where Gradio's own launch() would: the Space sets GRADIO_SERVER_PORT / _NAME and
+# forwards its public port there (7860 itself is taken on ZeroGPU before app.py starts).
+HOST = os.getenv("GRADIO_SERVER_NAME", "0.0.0.0")
+PORT = int(os.getenv("GRADIO_SERVER_PORT", "7860"))
 
 if __name__ == "__main__":
-    if not _port_free(PORT):
-        # Diagnose instead of loading the models first: only the end of the log is visible.
-        import os
-        import sys
-        print(f"PORT {PORT} IS TAKEN by {_port_holder(PORT)}", flush=True)
-        print(f"me: pid {os.getpid()} argv {sys.argv}; parent: "
-              f"{open(f'/proc/{os.getppid()}/cmdline', 'rb').read().replace(b'\0', b' ')[:200]!r}",
-              flush=True)
-        print("env:", {k: v for k, v in os.environ.items()
-                       if k.startswith("GRADIO_") or k in ("PORT", "SPACES_ZERO_GPU")}, flush=True)
-        sys.exit(1)
-    uvicorn.run(app, host="0.0.0.0", port=PORT)
+    print(f"nightly API listening on {HOST}:{PORT}", flush=True)
+    uvicorn.run(app, host=HOST, port=PORT)
