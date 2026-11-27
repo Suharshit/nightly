@@ -95,3 +95,15 @@ def test_caveat_counts_guesses_where_the_owner_found_nothing_stated():
     assert run_extract_eval.guessed(SAMPLE, LABELS, "seniority") == (0, 1)
     text = run_extract_eval.caveat(SAMPLE, LABELS)
     assert "0 of 0" in text and "full_time" in text
+
+
+def test_rescore_changes_only_llm_rows_and_only_years_and_seniority():
+    from eval import rescore_extract
+    sample = [_row(1, "rules", seniority="junior", min_exp_years=1),
+              _row(2, "rules+llm:qwen2.5:3b", seniority="senior", min_exp_years=5,
+                   work_mode="remote")]
+    texts = {2: ("Backend Engineer", "Build services. Great team.")}   # no years stated
+    new = rescore_extract.rescore(sample, texts)
+    assert new[0] == sample[0]
+    assert new[1]["pred"]["min_exp_years"] is None and new[1]["pred"]["seniority"] is None
+    assert new[1]["pred"]["work_mode"] == "remote"

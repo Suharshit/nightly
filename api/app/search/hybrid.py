@@ -72,12 +72,35 @@ def where(f: Filters) -> tuple[str, dict]:
     return " and ".join(sql), params
 
 
+# Keyword search only matches words, so a query word and its common alternate spelling are
+# both searched ("golang" finds jobs that say "Go"). Both directions; phrases are quoted.
+_SYNONYM_GROUPS = [
+    ("golang", "go"), ("js", "javascript"), ("ts", "typescript"),
+    ("ml", '"machine learning"'), ("ai", '"artificial intelligence"'),
+    ("k8s", "kubernetes"), ("postgres", "postgresql"), ("nodejs", "node"),
+    ("frontend", '"front end"'), ("backend", '"back end"'),
+    ("sde", '"software engineer"'), ("swe", '"software engineer"'),
+    ("ux", '"user experience"'), ("qa", '"quality assurance"'),
+    ("devrel", '"developer relations"'), ("hr", '"human resources"'),
+    ("sre", '"site reliability"'), ("llm", '"language model"'),
+]
+SYNONYMS: dict[str, list[str]] = {}
+for _group in _SYNONYM_GROUPS:
+    for _t in _group:
+        SYNONYMS.setdefault(_t.strip('"').lower(), []).extend(o for o in _group if o != _t)
+
+
 def or_query(q: str) -> str:
     """Terms joined with OR for websearch_to_tsquery, so a job matching 2 of 3 words still
     ranks (plain websearch syntax ANDs every word, which empties short queries).
-    Quoted phrases and -exclusions are kept as written."""
-    parts = re.findall(r'-?"[^"]+"|\S+', q)
-    return " or ".join(p for p in parts if p.lower() != "or")
+    Quoted phrases and -exclusions are kept as written; plain words also bring their
+    SYNONYMS, each once."""
+    parts = [p for p in re.findall(r'-?"[^"]+"|\S+', q) if p.lower() != "or"]
+    out = list(parts)
+    for p in parts:
+        if not p.startswith(("-", '"')):
+            out += SYNONYMS.get(p.lower(), [])
+    return " or ".join(dict.fromkeys(out))
 
 
 # Both retrievers and the job details in one round trip: the API host and Supabase are far

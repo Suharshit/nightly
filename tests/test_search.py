@@ -24,8 +24,16 @@ def test_rrf_ties_keep_first_seen_order_and_handles_empty():
 
 
 def test_or_query_keeps_phrases_and_exclusions():
-    assert hybrid.or_query('python  backend') == "python or backend"
-    assert hybrid.or_query('"react native" -senior or go') == '"react native" or -senior or go'
+    assert hybrid.or_query('python  api') == "python or api"
+    assert hybrid.or_query('"react native" -senior or rust') == '"react native" or -senior or rust'
+
+
+def test_or_query_adds_synonyms_once():
+    assert hybrid.or_query("golang developer") == "golang or developer or go"
+    assert hybrid.or_query("ML engineer") == 'ML or engineer or "machine learning"'
+    assert hybrid.or_query("machine learning") == "machine or learning"   # words, not phrase
+    assert hybrid.or_query("go golang") == "go or golang"
+    assert hybrid.or_query("-golang") == "-golang"
 
 
 @pytest.mark.parametrize("q,level", [

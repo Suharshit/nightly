@@ -125,6 +125,27 @@ def experience(text: str) -> tuple[int | None, int | None]:
     return None, None
 
 
+_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
+          "eight": 8, "nine": 9, "ten": 10, "zero": 0}
+_YEARS_RX = re.compile(r"\b(\d{1,2}|" + "|".join(_WORDS) + r")\s*\+?\s*(?:(?:-|–|to)\s*"
+                       r"(\d{1,2})\s*\+?\s*)?(?:\(\d{1,2}\)\s*)?(?:years?|yrs?)",
+                       re.IGNORECASE)
+
+
+def stated_years(text: str) -> set[int]:
+    """Every number the posting itself gives as years ("3+ years", "2-4 yrs", "five years"),
+    plus 0 and 1 when it says fresher / 0-1 years. Used to check an LLM's years."""
+    out: set[int] = set()
+    for m in _YEARS_RX.finditer(text):
+        a = m.group(1).lower()
+        out.add(_WORDS[a] if a in _WORDS else int(a))
+        if m.group(2):
+            out.add(int(m.group(2)))
+    if _FRESHER_TEXT.search(text):
+        out |= {0, 1}
+    return out
+
+
 def seniority_from_years(lo: int | None) -> str | None:
     if lo is None:
         return None
