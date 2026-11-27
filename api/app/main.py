@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request, UploadFile
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -85,19 +85,24 @@ class Matches(BaseModel):
     personalised: bool
     count: int
     took_ms: int
+    timings: dict[str, float] = {}     # ms per pipeline stage (also in the Server-Timing header)
     jobs: list[Job]
 
 
 @app.get("/health")
 def health(request: Request) -> dict:
+    """Up, and one database round trip from this server (db_ms), to tell network from work."""
     with request.app.state.pool.connection() as conn:
+        t = time.perf_counter()
         conn.execute("select 1")
-    return {"ok": True}
+        db_ms = round((time.perf_counter() - t) * 1000, 1)
+    return {"ok": True, "db_ms": db_ms}
 
 
 @app.get("/matches", response_model=Matches)
 def matches(
     request: Request,
+    response: Response,
     user: Annotated[dict | None, Depends(optional_user)],
     q: Annotated[str, Query(max_length=200)] = "",
     level: Literal["student", "fresher", "junior"] | None = None,
@@ -122,9 +127,11 @@ def matches(
     except pipeline.NeedsQuery as e:
         raise HTTPException(400, str(e)) from e
     took = int((time.perf_counter() - started) * 1000)
+    response.headers["Server-Timing"] = ", ".join(
+        [f"{name};dur={ms}" for name, ms in res.timings.items()] + [f"total;dur={took}"])
     return Matches(q=q, mode=res.mode, level=res.level,
                    personalised=bool(user) and personalise, count=len(res.jobs),
-                   took_ms=took, jobs=[Job(**j) for j in res.jobs])
+                   took_ms=took, timings=res.timings, jobs=[Job(**j) for j in res.jobs])
 
 
 class Feedback(BaseModel):

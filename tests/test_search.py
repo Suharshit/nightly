@@ -166,4 +166,15 @@ def test_matches_validates_input(client):
     c, _ = client
     assert c.get("/matches", params={"q": ""}).status_code == 400  # no query, no resume
     assert c.get("/matches", params={"q": "go", "level": "senior"}).status_code == 422
-    assert c.get("/health").json() == {"ok": True}
+    health = c.get("/health").json()
+    assert health["ok"] is True and isinstance(health["db_ms"], float)
+
+
+def test_matches_reports_stage_timings(client):
+    c, _ = client
+    r = c.get("/matches", params={"q": "python backend"})
+    timings = r.json()["timings"]
+    assert {"embed", "search", "rerank", "personalise"} <= set(timings)
+    assert "profile" not in timings and "log_shown" not in timings   # anonymous: no profile
+    header = r.headers["server-timing"]
+    assert header.startswith("embed;dur=") and "total;dur=" in header

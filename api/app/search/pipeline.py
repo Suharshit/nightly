@@ -2,6 +2,8 @@
 personalise -> diversify -> reasons. /matches uses it now; the agent's search_jobs tool later.
 """
 
+import time
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 
 from api.app import profile as prof
@@ -35,6 +37,22 @@ class Result:
     jobs: list[dict]
     level: str | None
     mode: str          # "query" or "feed" (no query: the resume stands in)
+    timings: dict[str, float] = field(default_factory=dict)  # ms per stage, in order
+
+
+class Stages:
+    """Wall-clock milliseconds per pipeline stage, to see where a request spends its time."""
+
+    def __init__(self):
+        self.ms: dict[str, float] = {}
+
+    @contextmanager
+    def __call__(self, name: str):
+        t = time.perf_counter()
+        try:
+            yield
+        finally:
+            self.ms[name] = round(self.ms.get(name, 0.0) + (time.perf_counter() - t) * 1000, 1)
 
 
 def to_pgvector(vec: list[float]) -> str:
@@ -42,9 +60,10 @@ def to_pgvector(vec: list[float]) -> str:
 
 
 def run(pool, embedder, reranker, req: Request, user: dict | None) -> Result:
+    stage = Stages()
     p = None
     if user:
-        with pool.connection() as conn, conn.cursor() as cur:
+        with stage("profile"), pool.connection() as conn, conn.cursor() as cur:
             p = prof.load_profile(cur, user["id"])
     prefs = p.prefs if p else {}
     q = req.q.strip()
@@ -55,7 +74,8 @@ def run(pool, embedder, reranker, req: Request, user: dict | None) -> Result:
 
     if q:
         mode, keyword_text, rerank_text = "query", q, q
-        qvec = to_pgvector(embedder.query(q)) if req.use_vector else None
+        with stage("embed"):
+            qvec = to_pgvector(embedder.query(q)) if req.use_vector else None
     else:
         if p is None or p.resume_vec is None:
             raise NeedsQuery("Type what you're looking for, or upload your resume first.")
@@ -65,18 +85,20 @@ def run(pool, embedder, reranker, req: Request, user: dict | None) -> Result:
 
     f = Filters(level=level, cities=cities, remote=remote,
                 exclude_ids=p.exclude_ids if p else [], new_only=req.new_only)
-    with pool.connection() as conn, conn.cursor() as cur:
+    with stage("search"), pool.connection() as conn, conn.cursor() as cur:
         jobs = search(cur, keyword_text, qvec, f, use_keyword=req.use_keyword,
                       use_vector=req.use_vector, limit=FUSED,
                       taste=p.taste if p and req.use_profile else None)
     if req.use_rerank:
-        jobs = rerank(reranker, rerank_text, jobs)
+        with stage("rerank"):
+            jobs = rerank(reranker, rerank_text, jobs)
     if req.use_final:
-        jobs = personalise(jobs, p, use_profile=req.use_profile)[:req.limit]
+        with stage("personalise"):
+            jobs = personalise(jobs, p, use_profile=req.use_profile)[:req.limit]
     else:  # the eval's "stop after this stage" variants
         jobs = [j | {"final_score": j.get("rerank_score") or j["score"], "parts": {},
                      "reason": ""} for j in jobs[:req.limit]]
     if p and req.log_shown and jobs:
-        with pool.connection() as conn, conn.cursor() as cur:
+        with stage("log_shown"), pool.connection() as conn, conn.cursor() as cur:
             prof.log_shown(cur, p.user_id, [j["id"] for j in jobs])
-    return Result(jobs=jobs, level=level, mode=mode)
+    return Result(jobs=jobs, level=level, mode=mode, timings=stage.ms)
