@@ -86,3 +86,12 @@ def test_committed_sample_is_frozen_and_balanced():
     assert groups.count("rules only") == groups.count("rules + LLM") == ec.PER_SOURCE
     assert len({r["job_id"] for r in sample}) == len(sample)
     assert all(set(r["pred"]) == set(ec.FIELDS) | {"skills"} for r in sample)
+
+
+def test_caveat_counts_guesses_where_the_owner_found_nothing_stated():
+    # job 2: extractor says remote, owner says remote (match); job 1: both None (match)
+    assert run_extract_eval.guessed(SAMPLE, LABELS, "work_mode") == (0, 0)
+    # seniority: job 1 matches, job 2 senior vs mid (a miss, but the owner did state it)
+    assert run_extract_eval.guessed(SAMPLE, LABELS, "seniority") == (0, 1)
+    text = run_extract_eval.caveat(SAMPLE, LABELS)
+    assert "0 of 0" in text and "full_time" in text
