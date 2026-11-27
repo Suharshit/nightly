@@ -1,9 +1,10 @@
 """FastAPI routes. Run locally: uvicorn api.app.main:app --port 8000"""
 
+import math
 import os
 import time
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, UploadFile
@@ -243,18 +244,44 @@ class ChatOut(BaseModel):
     follow_up_chips: list[str]
     json_valid: bool
     took_ms: int
+    chats_left: int           # messages left in this user's rolling 24-hour allowance
+
+
+# Groq's free tier gives each model 200K tokens a day for everyone together, and one chat turn
+# takes ~6-8K tokens over 2-3 calls, so a few heavy users could empty it. Each user gets this
+# many messages per rolling 24 hours; matches and search are not limited.
+CHAT_DAILY_LIMIT = int(os.getenv("CHAT_DAILY_LIMIT", "10"))
+CHAT_QUOTA = ("select count(*), min(created_at) from messages where user_id = %s "
+              "and role = 'user' and created_at > now() - interval '24 hours'")
+
+
+def chat_quota(pool, user_id: str) -> tuple[int, datetime | None]:
+    """Messages this user sent in the last 24 hours, and when the oldest of them was sent."""
+    with pool.connection() as conn, conn.cursor() as cur:
+        cur.execute(CHAT_QUOTA, (user_id,))
+        row = cur.fetchone()
+    return (row[0], row[1]) if row else (0, None)
 
 
 @app.post("/chat", response_model=ChatOut)
 def chat(request: Request, body: ChatIn,
-         user: Annotated[dict | None, Depends(optional_user)]) -> ChatOut:
-    """Signed in: memory and saved preferences. Anonymous: a one-off search chat."""
+         user: Annotated[dict, Depends(current_user)]) -> ChatOut:
+    """One chat turn, with memory and saved preferences. Signed-in users only, capped per day."""
     st = request.app.state
     if st.llm is None:
         raise HTTPException(503, "Chat is not configured on this server.")
+    used, oldest = chat_quota(st.pool, user["id"])
+    if used >= CHAT_DAILY_LIMIT:
+        wait = "tomorrow"
+        if oldest is not None:
+            hours = (oldest + timedelta(hours=24) - datetime.now(UTC)).total_seconds() / 3600
+            wait = f"in about {max(1, math.ceil(hours))} h"
+        raise HTTPException(429, f"You've used today's {CHAT_DAILY_LIMIT} chat messages. "
+                                 f"Your matches still work, and chat opens again {wait}.")
     started = time.perf_counter()
     turn = Agent(st.pool, st.embedder, st.reranker, st.llm).respond(user, body.message.strip())
     jobs = [c | {"reason": turn.reply.reasons.get(c["id"]) or c["reason"]} for c in turn.jobs]
     return ChatOut(reply=turn.reply.reply, jobs=jobs, follow_up_chips=turn.reply.follow_up_chips,
                    json_valid=turn.json_valid,
-                   took_ms=int((time.perf_counter() - started) * 1000))
+                   took_ms=int((time.perf_counter() - started) * 1000),
+                   chats_left=max(0, CHAT_DAILY_LIMIT - used - 1))
