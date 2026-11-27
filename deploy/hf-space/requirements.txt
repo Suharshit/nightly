@@ -1,0 +1,3 @@
+# Installed by the Space next to Gradio (the README pins sdk_version). The API's own pins,
+# including CPU-only torch and sentence-transformers.
+-r api/requirements-models.txt

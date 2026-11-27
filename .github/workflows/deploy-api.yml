@@ -1,14 +1,15 @@
 name: deploy-api
 
-# Builds the API image on every change to it; on main, uploads it to the Hugging Face Space,
-# which rebuilds and restarts. Needs the HF_TOKEN secret and the HF_SPACE variable
-# ("owner/space-name"); without them the upload step is skipped.
+# The API runs on a free Hugging Face Gradio Space (deploy/hf-space). On every change to it,
+# this installs the Space's packages the way the Space does and checks the API starts; on main
+# it uploads the Space folder, and the Space rebuilds. Needs the HF_TOKEN secret and the
+# HF_SPACE variable ("owner/space-name"); without them the upload step is skipped.
 on:
   push:
     branches: [main]
-    paths: ["api/**", "worker/**", "deploy/hf-space/**", ".dockerignore", ".github/workflows/deploy-api.yml"]
+    paths: ["api/**", "worker/**", "deploy/hf-space/**", ".github/workflows/deploy-api.yml"]
   pull_request:
-    paths: ["api/**", "worker/**", "deploy/hf-space/**", ".dockerignore", ".github/workflows/deploy-api.yml"]
+    paths: ["api/**", "worker/**", "deploy/hf-space/**", ".github/workflows/deploy-api.yml"]
   workflow_dispatch:
 
 concurrency:
@@ -21,21 +22,33 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
-      - name: Build the image
-        run: docker build -f deploy/hf-space/Dockerfile -t nightly-api .
-      - name: Start it and check that it imports and loads the models
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Assemble the Space folder
+        run: bash deploy/hf-space/assemble.sh space
+      - name: Install Gradio and the requirements together, as the Space does
+        working-directory: space
         run: |
-          # Fake but well-formed settings: startup opens the pool lazily and only fails on use.
-          docker run -d --name api -p 7860:7860 \
-            -e DATABASE_URL=postgresql://x:x@127.0.0.1:1/x \
-            -e SUPABASE_URL=https://example.supabase.co -e SUPABASE_ANON_KEY=x \
-            nightly-api
-          for i in $(seq 1 60); do
-            if docker logs api 2>&1 | grep -q "Application startup complete"; then echo "started"; exit 0; fi
-            if [ "$(docker inspect -f '{{.State.Running}}' api)" != "true" ]; then break; fi
+          gradio=$(sed -n 's/^sdk_version: *//p' README.md)
+          pip install "gradio==$gradio" -r requirements.txt
+      - name: Start app.py and check the API answers
+        working-directory: space
+        env:
+          # Well-formed but fake: the pool connects lazily, so startup does not need a database.
+          DATABASE_URL: postgresql://x:x@127.0.0.1:1/x
+          SUPABASE_URL: https://example.supabase.co
+          SUPABASE_ANON_KEY: x
+        run: |
+          python app.py > app.log 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -sf http://127.0.0.1:7860/openapi.json | grep -q '"/matches"'; then
+              curl -sf http://127.0.0.1:7860/ui/ > /dev/null && echo "API and /ui answer"
+              exit 0
+            fi
             sleep 2
           done
-          docker logs api; exit 1
+          cat app.log; exit 1
 
   deploy:
     needs: build
@@ -53,10 +66,8 @@ jobs:
       - name: Upload to the Space
         if: env.HF_TOKEN != '' && env.HF_SPACE != ''
         run: |
-          pip install -q "huggingface_hub>=0.26"
-          mkdir space
-          cp deploy/hf-space/Dockerfile deploy/hf-space/README.md .dockerignore space/
-          rsync -a --exclude '__pycache__' api worker space/
+          bash deploy/hf-space/assemble.sh space
+          pip install -q "huggingface_hub>=1.16"
           python - <<'EOF'
           import os
           from huggingface_hub import HfApi
