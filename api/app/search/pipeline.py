@@ -27,6 +27,7 @@ class Request:
     use_profile: bool = True
     use_final: bool = True   # freshness + profile terms + diversity; off = rerank/fused order
     log_shown: bool = True
+    new_only: bool = False   # "New since yesterday": only jobs the latest nightly run added
 
 
 @dataclass
@@ -63,7 +64,7 @@ def run(pool, embedder, reranker, req: Request, user: dict | None) -> Result:
         qvec = p.resume_vec if req.use_vector else None
 
     f = Filters(level=level, cities=cities, remote=remote,
-                exclude_ids=p.exclude_ids if p else [])
+                exclude_ids=p.exclude_ids if p else [], new_only=req.new_only)
     with pool.connection() as conn, conn.cursor() as cur:
         jobs = search(cur, keyword_text, qvec, f, use_keyword=req.use_keyword,
                       use_vector=req.use_vector, limit=FUSED,

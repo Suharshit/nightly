@@ -108,12 +108,14 @@ def matches(
     vector: bool = True,
     rerank: bool = True,
     personalise: bool = True,
+    new: bool = False,
 ) -> Matches:
-    """With q: search. Without q (signed in, resume uploaded): the personal feed."""
+    """With q: search. Without q (signed in, resume uploaded): the personal feed.
+    new=true keeps only jobs the latest nightly run added ("New since yesterday")."""
     started = time.perf_counter()
     req = pipeline.Request(q=q, level=level, cities=city or [], remote=remote, limit=limit,
                            use_keyword=keyword, use_vector=vector, use_rerank=rerank,
-                           use_profile=personalise)
+                           use_profile=personalise, new_only=new)
     st = request.app.state
     try:
         res = pipeline.run(st.pool, st.embedder, st.reranker, req, user)
