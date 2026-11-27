@@ -39,6 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ThemeToggle />
           </header>
           <main className="flex flex-1 flex-col px-4 py-5">{children}</main>
+          <footer className="px-4 pb-6 text-center text-xs text-muted">
+            <Link href="/privacy" className="underline">Privacy</Link>
+          </footer>
         </div>
       </body>
     </html>
