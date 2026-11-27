@@ -16,10 +16,15 @@ except ImportError:
 
 import os
 
-import gradio as gr
-import uvicorn
+# On Spaces, Gradio turns on server-side rendering, which starts a Node server during the mounted
+# page's startup. It took the first free port, 7860, before uvicorn could bind it
+# ("address already in use"). The placeholder page does not need SSR.
+os.environ["GRADIO_SSR_MODE"] = "false"
 
-from api.app.main import app
+import gradio as gr  # noqa: E402  (after the SSR switch)
+import uvicorn  # noqa: E402
+
+from api.app.main import app  # noqa: E402
 
 
 def _gpu_stub() -> str:
