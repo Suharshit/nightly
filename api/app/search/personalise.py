@@ -60,12 +60,13 @@ def penalty(job: dict, p: Profile) -> float:
     return 0.0
 
 
-def score(job: dict, p: Profile | None, now: datetime, rerank_norm: float) -> dict:
+def score(job: dict, p: Profile | None, now: datetime, rerank_norm: float,
+          use_fresh: bool = True) -> dict:
     """Adds the parts and the final score. Without a profile only rerank + freshness count."""
     parts = {
         "taste": (job.get("taste_sim") or 0.0) if p else 0.0,
         "skills": jaccard(job.get("skills") or [], p.resume_skills) if p else 0.0,
-        "fresh": freshness(job.get("seen_at"), now),
+        "fresh": freshness(job.get("seen_at"), now) if use_fresh else 0.0,
         "penalty": penalty(job, p) if p else 0.0,
     }
     final = (W_RERANK * rerank_norm + W_TASTE * parts["taste"] + W_SKILLS * parts["skills"]
@@ -131,13 +132,17 @@ def _label(skill: str) -> str:
 
 
 def personalise(jobs: list[dict], p: Profile | None, now: datetime | None = None,
-                *, use_profile: bool = True) -> list[dict]:
-    """Score, sort, diversify and attach reasons. use_profile=False is the eval's baseline."""
+                *, use_profile: bool = True, use_fresh: bool = True,
+                use_diversity: bool = True) -> list[dict]:
+    """Score, sort, diversify and attach reasons. use_profile=False is the eval's baseline.
+    Searches with a query turn freshness and diversity off: on the labelled queries they cost
+    0.078 NDCG@10 for 0.011 recall (eval/results.md). The query-less feed keeps both."""
     now = now or datetime.now(UTC)
     prof = p if use_profile else None
     n = max(len(jobs), 1)
     # With rerank off, the fused order stands in for rerank_norm (1.0 for the top, down to ~0).
     scored = sorted((score(j, prof, now, j["rerank_score"] if j.get("rerank_score") is not None
-                           else 1 - i / n) for i, j in enumerate(jobs)),
+                           else 1 - i / n, use_fresh) for i, j in enumerate(jobs)),
                     key=lambda j: -j["final_score"])
-    return [j | {"reason": reason(j, p, now)} for j in diversify(scored)]
+    ordered = diversify(scored) if use_diversity else scored
+    return [j | {"reason": reason(j, p, now)} for j in ordered]

@@ -28,6 +28,9 @@ class Request:
     use_rerank: bool = True
     use_profile: bool = True
     use_final: bool = True   # freshness + profile terms + diversity; off = rerank/fused order
+    # None = by mode: on for the query-less feed, off for searches with a query (eval).
+    use_fresh: bool | None = None
+    use_diversity: bool | None = None
     log_shown: bool = True
     defer_shown: bool = False  # don't log here; Result.shown_by tells the caller whom to log for
     new_only: bool = False   # "New since yesterday": only jobs the latest nightly run added
@@ -96,7 +99,12 @@ def run(pool, embedder, reranker, req: Request, user: dict | None) -> Result:
             jobs = rerank(reranker, rerank_text, jobs)
     if req.use_final:
         with stage("personalise"):
-            jobs = personalise(jobs, p, use_profile=req.use_profile)[:req.limit]
+            by_mode = mode == "feed"
+            jobs = personalise(
+                jobs, p, use_profile=req.use_profile,
+                use_fresh=by_mode if req.use_fresh is None else req.use_fresh,
+                use_diversity=by_mode if req.use_diversity is None else req.use_diversity,
+            )[:req.limit]
     else:  # the eval's "stop after this stage" variants
         jobs = [j | {"final_score": j.get("rerank_score") or j["score"], "parts": {},
                      "reason": ""} for j in jobs[:req.limit]]

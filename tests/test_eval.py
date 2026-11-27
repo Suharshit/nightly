@@ -41,7 +41,9 @@ def test_pooled_is_union_shuffled_and_reproducible():
 def test_variants_add_one_stage_each():
     v = list(common.VARIANTS.values())
     assert v[2] == {"use_rerank": False, "use_final": False}
-    assert v[3] == {"use_final": False} and v[4] == {}
+    assert v[3] == {"use_final": False}
+    assert v[4] == {"use_fresh": True, "use_diversity": True}   # the old query behaviour
+    assert v[5] == {}                                           # as /matches serves a query
 
 
 def test_labels_later_line_wins(tmp_path, monkeypatch):

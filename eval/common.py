@@ -22,7 +22,9 @@ VARIANTS: dict[str, dict] = {
     "hybrid RRF": {"use_rerank": False, "use_final": False},
     "hybrid + rerank": {"use_final": False},
     # Anonymous queries have no profile, so this stage adds freshness + company diversity.
-    "+ freshness & diversity": {},
+    # Searches with a query no longer use it (it scored lower); kept to show why.
+    "+ freshness & diversity": {"use_fresh": True, "use_diversity": True},
+    "as served (query)": {},  # what /matches does for a typed search today
 }
 
 
