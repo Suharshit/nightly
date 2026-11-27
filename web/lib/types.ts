@@ -24,6 +24,7 @@ export type ChatReply = {
   follow_up_chips: string[];
   json_valid: boolean;
   took_ms: number;
+  chats_left: number;
 };
 
 export type Me = {

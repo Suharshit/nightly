@@ -18,6 +18,7 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [left, setLeft] = useState<number | null>(null);
   const end = useRef<HTMLDivElement>(null);
 
   // Braces matter: newer Chrome returns a Promise from scrollIntoView, and an effect that returns
@@ -35,6 +36,7 @@ export default function Chat() {
     try {
       const r = await api.chat(message);
       setMessages((m) => [...m, { role: "assistant", text: r.reply, jobs: r.jobs, chips: r.follow_up_chips }]);
+      setLeft(r.chats_left);
     } catch (e) {
       setMessages((m) => [...m, { role: "assistant", text: (e as Error).message }]);
     } finally {
@@ -62,6 +64,11 @@ export default function Chat() {
           </div>
         ))}
         {busy && <p className="text-sm text-muted">Looking…</p>}
+        {!busy && left !== null && left <= 3 && (
+          <p className="text-xs text-muted">
+            {left === 0 ? "That was your last chat for today." : `${left} chat${left === 1 ? "" : "s"} left today.`}
+          </p>
+        )}
         <div ref={end} />
       </div>
 

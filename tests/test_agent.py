@@ -264,16 +264,43 @@ def test_chat_route_returns_cards_with_reasons(api, fake_search):
                                   answer({"reply": "Try this", "job_ids": [7],
                                           "reasons": {"7": "Uses your Python"}})])
     main.app.state.pool = DB()
-    r = client.post("/chat", json={"message": "python internship"})
-    assert r.status_code == 200, r.text
-    body = r.json()
-    assert body["reply"] == "Try this" and body["json_valid"]
-    assert [j["id"] for j in body["jobs"]] == [7]
-    assert body["jobs"][0]["reason"] == "Uses your Python"
-    assert client.post("/chat", json={"message": ""}).status_code == 422
-    main.app.state.llm = None
-    assert client.post("/chat", json={"message": "hi"}).status_code == 503
-    main.app.state.pool = pool
+    h = {"Authorization": "Bearer good-token"}
+    try:
+        assert client.post("/chat", json={"message": "python internship"}).status_code == 401
+        r = client.post("/chat", json={"message": "python internship"}, headers=h)
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["reply"] == "Try this" and body["json_valid"]
+        assert [j["id"] for j in body["jobs"]] == [7]
+        assert body["jobs"][0]["reason"] == "Uses your Python"
+        assert body["chats_left"] == main.CHAT_DAILY_LIMIT - 1
+        assert client.post("/chat", json={"message": ""}, headers=h).status_code == 422
+        main.app.state.llm = None
+        assert client.post("/chat", json={"message": "hi"}, headers=h).status_code == 503
+    finally:
+        main.app.state.pool = pool
+
+
+def test_chat_cap_stops_at_the_daily_limit(api):
+    from datetime import UTC, datetime, timedelta
+    client, pool, _ = api
+    h = {"Authorization": "Bearer good-token"}
+    llm = FakeLLM([answer({"reply": "ok", "job_ids": []})])
+    main.app.state.llm = llm
+    try:
+        oldest = datetime.now(UTC) - timedelta(hours=20)  # frees a slot in about 4 hours
+        main.app.state.pool = DB(one=[(main.CHAT_DAILY_LIMIT, oldest)])
+        r = client.post("/chat", json={"message": "more jobs"}, headers=h)
+        assert r.status_code == 429
+        assert "in about 4 h" in r.json()["detail"] and llm.calls == []  # no tokens spent
+
+        main.app.state.pool = db = DB(one=[(main.CHAT_DAILY_LIMIT - 1, oldest)])
+        r = client.post("/chat", json={"message": "last one"}, headers=h)
+        assert r.status_code == 200 and r.json()["chats_left"] == 0
+        assert db.sql("select count(*), min(created_at) from messages")[0] == (
+            "00000000-0000-0000-0000-0000000000aa",)  # the signed-in user's own count
+    finally:
+        main.app.state.pool = pool
 
 
 # --- fixes found in the live 5-turn run ------------------------------------------------
