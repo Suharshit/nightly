@@ -18,13 +18,35 @@ The product aims for fewer, better jobs. A job's level is shown only when the po
 - **Apply and Share on WhatsApp** on every card.
 - **New since yesterday:** jobs added by the latest nightly run.
 - **Chat.** An agent with 5 tools: `search_jobs`, `get_job`, `update_prefs`, `record_feedback` and `explain_match`. It can only name jobs that a tool returned this turn, and the server checks this.
-- **Delete my data** removes your account and every row tied to it.
+- **Report a bug** from inside the app; reports are listed for the owner on `/stats`.
+- **Delete my data** (in the ••• menu) removes your account and every row tied to it.
 
 <!-- user-flow:start -->
 ## User flow
 
-_The owner's flow diagram goes here._
-<!-- user-flow:end -->
+```mermaid
+flowchart TD
+  V((Visitor)) --> S{Signed in?}
+  S -- no --> L[Landing page<br/>what nightly does · sign in with Google or an email code]
+  L --> O[Setup<br/>resume PDF · roles · cities or remote · level]
+  S -- yes --> H
+  O --> H[Home<br/>one job card at a time]
+  H -- "swipe up (phone) · scroll down or ↓ (PC)" --> N[Next job]
+  N -- "swipe down · scroll up or ↑" --> H
+  H --> A["👍 like · 👎 not for me (with a reason) · Apply"]
+  H --> M["••• menu<br/>name · level · Remote T/F badge · cities"]
+  M --> C[Chat with the agent]
+  M --> P[Edit preferences]
+  M --> B[Report a bug]
+  M --> D[Delete my data]
+```
+
+Every screen uses the same frame: the logo, the theme switch and (once signed in) the ••• menu on top, with the content below in square-cornered boxes.
+
+- **Home.** Shows one job card at a time. The card holds the title, company, place, post date, level, experience, work mode, city, skills, why it matched, and a WhatsApp share link. The bar under it has 👍, 👎 and Apply.
+- **Landing page.** Signed-out visitors get the same frame, with what nightly does and the sign-in box.
+- **Report a bug.** Anyone, signed in or not, can report a bug from the app, without a GitHub account. The owner sees the reports on `/stats`.
+<!-- user-flow:end --><!-- user-flow:end -->
 
 ## Architecture
 
@@ -190,7 +212,7 @@ deploy/hf-space/  how the API runs on the Space
 ## Privacy
 
 - **What we keep:** your resume's extracted skills and vector, preferences, feedback and chat.
-- **Delete my data** at the bottom of Matches removes your account and all of these rows.
+- **Delete my data** in the ••• menu removes your account and all of these rows. It also removes the email from any bug report you sent.
 - **Details:** see [/privacy](https://nightlyjobs.vercel.app/privacy).
 
 The spec this was built from is in [docs/BRIEF.md](docs/BRIEF.md). Day-by-day notes are in [PROGRESS.md](PROGRESS.md).
