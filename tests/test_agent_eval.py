@@ -117,3 +117,20 @@ def test_proposed_convos_have_no_expected_answers():
     assert len(cases) >= 30 and len({c["id"] for c in cases}) == len(cases)
     for c in cases:
         assert set(c) == {"id", "message", "prefs", "history"}
+
+
+def test_labeller_rejects_values_the_agent_cannot_send(monkeypatch, capsys):
+    answers = iter(["Internship", "Student", "", "", "python"])
+    monkeypatch.setattr("builtins.input", lambda prompt="": next(answers))
+    assert label_agent.ask_args("search_jobs") == {"seniority": "student", "skills": ["python"]}
+    assert "only send one of: student, fresher, junior" in capsys.readouterr().out
+
+
+def test_label_choices_match_the_tool_schemas():
+    from api.app.agent.tools import SCHEMAS
+    props = {s["function"]["name"]: s["function"]["parameters"]["properties"] for s in SCHEMAS}
+    for tool, fields in ac.KEY_ARGS.items():
+        for name, _, choices in fields:
+            assert name in props[tool]
+            if choices:
+                assert choices == props[tool][name]["enum"], (tool, name)
