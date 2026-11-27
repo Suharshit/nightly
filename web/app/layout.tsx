@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 import Link from "next/link";
 
 import { Logo } from "@/components/Logo";
@@ -7,8 +7,16 @@ import { THEME_SCRIPT, ThemeToggle } from "@/components/ThemeToggle";
 
 import "./globals.css";
 
-const display = Space_Grotesk({ subsets: ["latin"], weight: ["500"], variable: "--font-display" });
-const body = Inter({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-body" });
+// Served from this app (app/fonts, SIL OFL 1.1), so builds never depend on reaching Google Fonts:
+// a failed font download broke a Vercel build once.
+const display = localFont({
+  src: "./fonts/space-grotesk-latin-500.woff2", weight: "500", variable: "--font-display",
+  display: "swap",
+});
+const body = localFont({
+  src: "./fonts/inter-latin-var.woff2", weight: "400 500", variable: "--font-body",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "nightly · startup jobs for freshers",
