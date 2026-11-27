@@ -6,6 +6,7 @@ Usage: python -m eval.run_extract_eval     (no database or API calls: sample + l
 import sys
 
 from eval.extract_common import FIELDS, LABELS, ROOT, SAMPLE, load_labels, load_sample, score
+from eval.extract_common import norm as ec_norm
 
 RESULTS = ROOT / "results.md"
 START, END = "<!-- extract-eval:start -->", "<!-- extract-eval:end -->"
@@ -14,6 +15,26 @@ GROUPS = ("all", "rules only", "rules + LLM")
 
 def pct(a: int, b: int) -> str:
     return "-" if not b else f"{100 * a / b:.0f}%"
+
+
+def guessed(sample: list[dict], labels: dict, field: str) -> tuple[int, int]:
+    """(jobs where the extractor gave a value but the owner found it not stated, jobs missed)."""
+    lab = [(r, labels[r["job_id"]]) for r in sample if r["job_id"] in labels]
+    missed = [(r, lb) for r, lb in lab if ec_norm(field, r["pred"][field])
+              != ec_norm(field, lb["fields"][field])]
+    return sum(lb["fields"][field] is None for _, lb in missed), len(missed)
+
+
+def caveat(sample: list[dict], labels: dict) -> str:
+    emp_g, emp_m = guessed(sample, labels, "employment_type")
+    wm_g, wm_m = guessed(sample, labels, "work_mode")
+    return ("Caveat on work_mode and employment_type: the labeller showed the title, location and "
+            "description, but not the boards' structured fields (Lever and Ashby send a workplace "
+            "type and a commitment; Greenhouse sends a remote flag), which the extractor uses. "
+            "The rules also default employment_type to full_time when nothing else is found. "
+            f"Of the employment_type misses, {emp_g} of {emp_m} are jobs the owner marked \"not "
+            f"stated\"; for work_mode it is {wm_g} of {wm_m}. So those two rows mostly measure "
+            "board metadata and the default against the description, not misread postings.")
 
 
 def table(scores: dict, n_sample: int) -> str:
@@ -58,7 +79,7 @@ def main() -> None:
     scores = score(sample, labels)
     if not scores:
         sys.exit("No labelled jobs yet: run python -m eval.label_extract")
-    section = table(scores, len(sample))
+    section = table(scores, len(sample)) + "\n\n" + caveat(sample, labels)
     print(section)
     write(section)
     print(f"\nWrote the Extraction section of {RESULTS.name}.")
