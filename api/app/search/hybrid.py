@@ -8,6 +8,7 @@ import re
 from dataclasses import dataclass, field
 
 RRF_K = 60
+SNIPPET_CHARS = 200        # the reranker reads this much of the description (rerank.JOB_CHARS)
 PER_RETRIEVER = 50
 FUSED = 30
 
@@ -99,13 +100,19 @@ EMPTY_CTE = "{name} as (select null::bigint as id, null::bigint as r where false
 CANDIDATES = """with {kw}, {vec}
 select j.id, j.title, c.name as company, j.city, j.work_mode, j.remote, j.seniority,
        j.min_exp_years, j.max_exp_years, j.skills, j.apply_url, j.posted_at,
-       left(j.description_text, 600) as snippet, kw.r as keyword_rank, vec.r as vector_rank,
+       left(j.description_text, %(snippet_chars)s) as snippet,
+       kw.r as keyword_rank, vec.r as vector_rank,
        j.company_id, coalesce(j.posted_at, j.first_seen) as seen_at,
        case when %(taste)s::vector is null then null
             else 1 - (j.embedding <=> %(taste)s::vector) end as taste_sim
 from jobs j join companies c on c.id = j.company_id
 left join kw on kw.id = j.id left join vec on vec.id = j.id
-where kw.id is not null or vec.id is not null"""
+where kw.id is not null or vec.id is not null
+-- Fuse in SQL too, so only the `limit` best rows cross the network (the API is far from the
+-- database: each round trip is ~200 ms, and 100 rows took more than one).
+order by coalesce(1.0 / (%(rrf_k)s + kw.r), 0) + coalesce(1.0 / (%(rrf_k)s + vec.r), 0) desc,
+         kw.r nulls last, vec.r
+limit %(limit)s"""
 
 
 def candidates_sql(cond: str, use_keyword: bool, use_vector: bool) -> str:
@@ -132,12 +139,16 @@ def search(cur, q: str, qvec: str | None, f: Filters, *, use_keyword: bool = Tru
     if not (use_keyword or use_vector):
         return []
     cond, params = where(f)
-    params |= {"k": PER_RETRIEVER, "tsq": or_query(q), "qvec": qvec, "taste": taste}
+    params |= {"k": PER_RETRIEVER, "tsq": or_query(q), "qvec": qvec, "taste": taste,
+               "rrf_k": RRF_K, "limit": limit, "snippet_chars": SNIPPET_CHARS}
     cur.execute(candidates_sql(cond, use_keyword, use_vector), params)
     cols = [c.name for c in cur.description]
-    rows = {r[0]: dict(zip(cols, r, strict=True)) for r in cur.fetchall()}
-    kw = sorted((d for d in rows if rows[d]["keyword_rank"]),
-                key=lambda d: rows[d]["keyword_rank"])
-    vec = sorted((d for d in rows if rows[d]["vector_rank"]),
-                 key=lambda d: rows[d]["vector_rank"])
-    return [rows[d] | {"score": round(s, 5)} for d, s in rrf(kw, vec)[:limit]]
+    rows = [dict(zip(cols, r, strict=True)) for r in cur.fetchall()]
+    # Score from each retriever's own rank (the rows are already cut to `limit`, so list
+    # positions are not ranks). Ties: keyword-ranked first, then by rank, as rrf() orders them.
+    for row in rows:
+        row["score"] = sum(1.0 / (RRF_K + r) for r in (row["keyword_rank"], row["vector_rank"])
+                           if r is not None)
+    rows.sort(key=lambda r: (-r["score"], r["keyword_rank"] is None,
+                             r["keyword_rank"] or 0, r["vector_rank"] or 0))
+    return [r | {"score": round(r["score"], 5)} for r in rows[:limit]]

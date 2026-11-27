@@ -5,7 +5,16 @@ from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from api.app import main
+from api.app import profile as prof
 from worker.embed import DIM
+
+
+@pytest.fixture(autouse=True)
+def _empty_profile_cache():
+    """The profile cache is process-wide; no test may see another test's profiles."""
+    prof._profiles.clear()
+    yield
+    prof._profiles.clear()
 
 
 class FakeEmbedder:

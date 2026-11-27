@@ -4,6 +4,7 @@ Used by the routes now and by the agent's update_prefs / record_feedback tools l
 """
 
 import math
+import time
 
 from api.app.search.personalise import Profile
 
@@ -42,6 +43,30 @@ def load_profile(cur, user_id: str) -> Profile | None:
                    prefs=prefs, disliked_companies=set(disliked), exclude_ids=list(exclude))
 
 
+# Profiles cached per user in this process: loading one is a round trip to a far-away
+# database (~200 ms). Every write that changes a profile calls forget_profile(). "Shown"
+# logging does not, so the hide-after-3-views list may lag by up to PROFILE_TTL seconds.
+PROFILE_TTL = 60.0
+_profiles: dict[str, tuple[float, Profile | None]] = {}
+
+
+def cached_profile(pool, user_id: str) -> Profile | None:
+    now = time.monotonic()
+    hit = _profiles.get(user_id)
+    if hit and hit[0] > now:
+        return hit[1]
+    with pool.connection() as conn, conn.cursor() as cur:
+        p = load_profile(cur, user_id)
+    if len(_profiles) > 5_000:
+        _profiles.clear()
+    _profiles[user_id] = (now + PROFILE_TTL, p)
+    return p
+
+
+def forget_profile(user_id: str) -> None:
+    _profiles.pop(str(user_id), None)
+
+
 def ensure_profile(cur, user: dict) -> None:
     cur.execute("insert into profiles (user_id, email) values (%s, %s) "
                 "on conflict (user_id) do nothing", (user["id"], user.get("email")))
@@ -68,6 +93,7 @@ def clean_prefs(patch: dict) -> dict:
 
 
 def update_prefs(cur, user: dict, patch: dict) -> dict:
+    forget_profile(user["id"])
     ensure_profile(cur, user)
     cur.execute("update profiles set prefs = coalesce(prefs, '{}') || %s::jsonb "
                 "where user_id = %s returning prefs", (_json(clean_prefs(patch)), user["id"]))
@@ -104,6 +130,7 @@ def record_feedback(cur, user: dict, job_id: int, action: str,
         raise ValueError(f"action must be one of {', '.join(ACTIONS)}")
     if reason is not None and (action != "dislike" or reason not in DISLIKE_REASONS):
         raise ValueError(f"reason is only for dislikes: {', '.join(DISLIKE_REASONS)}")
+    forget_profile(user["id"])
     cur.execute("select embedding::text, company_id, seniority, city from jobs where id = %s",
                 (job_id,))
     job = cur.fetchone()
