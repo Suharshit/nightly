@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Brand tokens (docs/BRIEF.md). RGB triplets so Tailwind can add opacity. */
+:root {
+  --bg: 255 255 255;
+  --card: 247 247 245;
+  --line: 229 229 226;
+  --muted: 107 107 115;
+  --text: 10 10 11;
+  --primary: 10 10 11;
+  --on-primary: 255 255 255;
+  --accent: 77 124 15;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 10 10 11;
+  --card: 22 22 26;
+  --line: 38 38 43;
+  --muted: 138 138 147;
+  --text: 244 244 242;
+  --primary: 198 255 61;
+  --on-primary: 10 10 11;
+  --accent: 198 255 61;
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--text));
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 2px;
+}

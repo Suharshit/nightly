@@ -1,11 +1,13 @@
 """FastAPI routes. Run locally: uvicorn api.app.main:app --port 8000"""
 
+import os
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from api.app import profile as prof
@@ -42,6 +44,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="nightly", lifespan=lifespan)
+
+# The web app calls the API from the browser. APP_BASE_URL may list several origins,
+# comma-separated (e.g. the Vercel URL and a preview URL).
+_origins = {o.strip().rstrip("/") for o in os.getenv("APP_BASE_URL", "").split(",") if o.strip()}
+app.add_middleware(CORSMiddleware, allow_origins=sorted(_origins | {"http://localhost:3000"}),
+                   allow_methods=["GET", "POST", "PATCH", "DELETE"],
+                   allow_headers=["Authorization", "Content-Type"])
 
 
 class Job(BaseModel):

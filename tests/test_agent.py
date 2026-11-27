@@ -358,3 +358,14 @@ def test_too_senior_on_an_intern_tagged_job_adds_no_avoid_rule():
     with db.connection() as cur:
         assert prof.record_feedback(cur, USER, 7, "dislike", "too_senior") == \
             {"avoid": {"seniority": "senior"}}
+
+
+def test_cors_allows_the_web_app(api):
+    client, _, _ = api
+    r = client.options("/chat", headers={"Origin": "http://localhost:3000",
+                                         "Access-Control-Request-Method": "POST",
+                                         "Access-Control-Request-Headers": "authorization"})
+    assert r.headers["access-control-allow-origin"] == "http://localhost:3000"
+    r = client.options("/chat", headers={"Origin": "https://evil.example",
+                                         "Access-Control-Request-Method": "POST"})
+    assert "access-control-allow-origin" not in r.headers
