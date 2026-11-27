@@ -188,9 +188,8 @@ def test_matches_reports_stage_timings(client):
     assert header.startswith("embed;dur=") and "total;dur=" in header
 
 
-def test_level_filter_hides_jobs_stating_no_level_unless_switched_off():
+def test_level_filter_can_hide_jobs_stating_no_level():
     hidden = "(j.seniority is not null or j.min_exp_years is not null)"
-    assert hidden in hybrid.where(hybrid.Filters(level="fresher"))[0]
-    assert hidden not in hybrid.where(hybrid.Filters(level="fresher",
-                                                     hide_unknown_level=False))[0]
+    assert hidden not in hybrid.where(hybrid.Filters(level="fresher"))[0]   # off by default
+    assert hidden in hybrid.where(hybrid.Filters(level="fresher", hide_unknown_level=True))[0]
     assert hidden not in hybrid.where(hybrid.Filters())[0]      # no level: nothing hidden

@@ -34,7 +34,7 @@ class Request:
     log_shown: bool = True
     defer_shown: bool = False  # don't log here; Result.shown_by tells the caller whom to log for
     new_only: bool = False   # "New since yesterday": only jobs the latest nightly run added
-    hide_unknown_level: bool = True  # with a level, leave out jobs stating no level or years
+    hide_unknown_level: bool = False  # True leaves out jobs stating no level or years
 
 
 @dataclass

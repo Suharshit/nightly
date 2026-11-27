@@ -74,6 +74,8 @@ def test_reason_is_built_from_data():
     j2 = job(2, city="Pune", min_exp_years=2, posted_at=NOW)
     assert pz.reason(j2, p, NOW) == "In Pune · 2+ yrs · Posted today"
     assert pz.reason(job(3, seniority="intern"), None, NOW) == "Internship"
+    assert pz.reason(job(4, city="Pune"), None, NOW) == "Pune · Level not stated"
+    assert pz.reason(job(5, seniority="senior"), None, NOW) == ""      # stated, no years
 
 
 def test_personalise_orders_by_final_score_and_respects_switch():

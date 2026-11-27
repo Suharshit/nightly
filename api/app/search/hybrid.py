@@ -41,9 +41,10 @@ class Filters:
     remote: bool = False          # with cities: those cities OR remote; alone: remote only
     exclude_ids: list[int] = field(default_factory=list)
     new_only: bool = False        # only jobs first seen in the latest nightly ingest run
-    # With a level, hide jobs that state neither a seniority nor years (temporary, 28 Nov):
-    # the owner prefers a shorter list a candidate can trust over jobs we can't vouch for.
-    hide_unknown_level: bool = True
+    # With a level, hide jobs that state neither a seniority nor years. Off: on the eval it
+    # dropped 22 of the owner's 34 perfect level-query matches (NDCG@10 0.746 -> 0.418), so
+    # these jobs are shown with "Level not stated" in their reason instead.
+    hide_unknown_level: bool = False
 
 
 # Jobs the latest ingest run added: first_seen is set when a job is first inserted.
