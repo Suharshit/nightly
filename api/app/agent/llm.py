@@ -22,7 +22,13 @@ class LLMError(RuntimeError):
 
 
 class ToolUseFailed(LLMError):
-    """The model produced a malformed tool call (e.g. a tool that does not exist)."""
+    """The model produced a malformed tool call (a tool that does not exist, an argument the
+    schema does not allow, or a tool call when none was on offer). Groq returns what the
+    model generated as `failed_generation`, which the loop can often still use."""
+
+    def __init__(self, message: str, failed_generation: str = ""):
+        super().__init__(message)
+        self.failed_generation = failed_generation or ""
 
 
 class GroqChat:
@@ -77,7 +83,11 @@ class GroqChat:
                         continue
                     break                                   # try the next model
                 if r.status_code == 400 and "tool_use_failed" in r.text:
-                    raise ToolUseFailed(f"{model}: {r.text[:300]}")
+                    try:
+                        failed = (r.json().get("error") or {}).get("failed_generation") or ""
+                    except ValueError:
+                        failed = ""
+                    raise ToolUseFailed(f"{model}: {r.text[:300]}", failed)
                 if r.status_code >= 400:
                     raise LLMError(f"{model}: HTTP {r.status_code}: {r.text[:300]}")
                 data = r.json()
