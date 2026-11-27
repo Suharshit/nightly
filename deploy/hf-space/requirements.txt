@@ -1,3 +1,6 @@
-# Installed by the Space next to Gradio (the README pins sdk_version). The API's own pins,
-# including CPU-only torch and sentence-transformers.
--r api/requirements-models.txt
+# Installed by the Space next to Gradio (the README pins sdk_version). ZeroGPU needs a regular
+# (CUDA) torch build from 2.8 up, so the API's torch==2.15.0+cpu pin is replaced here; the
+# models still run on CPU.
+-r api/requirements.txt
+torch==2.13.0
+sentence-transformers==6.3.0
