@@ -1,0 +1,55 @@
+"use client";
+
+import { accessToken } from "@/lib/supabase";
+import type { ChatReply, DislikeReason, Matches, Me } from "@/lib/types";
+
+const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
+async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = await accessToken();
+  const headers = new Headers(init.headers);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  if (init.body && !(init.body instanceof FormData)) headers.set("Content-Type", "application/json");
+  let res: Response;
+  try {
+    res = await fetch(`${API}${path}`, { ...init, headers });
+  } catch {
+    // The free API host sleeps when idle, so the first request can fail or be slow.
+    throw new ApiError(0, "Can't reach the server. It may be waking up; try again in a moment.");
+  }
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const body = await res.json();
+      detail = typeof body.detail === "string" ? body.detail : detail;
+    } catch {}
+    throw new ApiError(res.status, detail || `Error ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+export const api = {
+  me: () => call<Me>("/me"),
+  feed: () => call<Matches>("/matches?limit=5"),
+  search: (q: string) => call<Matches>(`/matches?limit=5&q=${encodeURIComponent(q)}`),
+  chat: (message: string) =>
+    call<ChatReply>("/chat", { method: "POST", body: JSON.stringify({ message }) }),
+  uploadResume: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return call<{ chars: number; skills: string[] }>("/resume", { method: "POST", body: form });
+  },
+  setPrefs: (prefs: Partial<Me["prefs"]>) =>
+    call<{ prefs: Me["prefs"] }>("/prefs", { method: "PATCH", body: JSON.stringify(prefs) }),
+  feedback: (job_id: number, action: "like" | "dislike" | "apply_click" | "share",
+             reason?: DislikeReason) =>
+    call<{ ok: boolean }>("/feedback", {
+      method: "POST", body: JSON.stringify({ job_id, action, reason: reason ?? null }),
+    }),
+};
