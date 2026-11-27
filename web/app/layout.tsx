@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import Link from "next/link";
-
-import { Logo } from "@/components/Logo";
-import { THEME_SCRIPT, ThemeToggle } from "@/components/ThemeToggle";
+import { Header } from "@/components/Header";
+import { THEME_SCRIPT } from "@/components/ThemeToggle";
 
 import "./globals.css";
 
@@ -20,7 +18,7 @@ const body = localFont({
 
 export const metadata: Metadata = {
   title: "nightly · startup jobs for freshers",
-  description: "Wake up to 3 startup jobs worth applying for.",
+  description: "Wake up to a short list of startup jobs you can actually apply for.",
   icons: { icon: "/icon.svg", apple: "/icon.svg" },
   manifest: "/manifest.webmanifest",
 };
@@ -40,16 +38,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="min-h-dvh bg-bg font-sans text-text antialiased">
-        <div className="mx-auto flex min-h-dvh max-w-md flex-col">
-          <header className="sticky top-0 z-10 flex items-center justify-between border-b border-line bg-bg/90 px-4 py-3 backdrop-blur">
-            <Link href="/"><Logo /></Link>
-            <ThemeToggle />
-          </header>
-          <main className="flex flex-1 flex-col px-4 py-5">{children}</main>
-          <footer className="px-4 pb-6 text-center text-xs text-muted">
-            <Link href="/privacy" className="underline">Privacy</Link>
-          </footer>
+      <body className="bg-bg font-sans text-text antialiased">
+        {/* One frame for every page: a phone-width column, outlined on wider screens. */}
+        <div className="mx-auto flex h-dvh max-w-xl flex-col md:border-x md:border-text">
+          <Header />
+          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</main>
         </div>
       </body>
     </html>

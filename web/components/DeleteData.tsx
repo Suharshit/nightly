@@ -34,17 +34,17 @@ export function DeleteData() {
     );
   }
   return (
-    <div className="rounded-2xl border border-line p-4 text-sm">
+    <div className="text-sm">
       <p>
         This deletes your account, resume, preferences, likes and chat history for good.
         It can&apos;t be undone.
       </p>
       <div className="mt-3 flex gap-2">
         <button onClick={remove} disabled={step === "busy"}
-                className="rounded-full bg-primary px-4 py-2 font-medium text-on-primary disabled:opacity-40">
+                className="btn btn-primary">
           {step === "busy" ? "Deleting…" : "Delete everything"}
         </button>
-        <button onClick={() => setStep("idle")} disabled={step === "busy"} className="px-3 text-muted">
+        <button onClick={() => setStep("idle")} disabled={step === "busy"} className="btn">
           Cancel
         </button>
       </div>

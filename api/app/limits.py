@@ -22,7 +22,8 @@ UPLOAD_PATH = "/resume"
 UPLOAD_LIMIT = MAX_BYTES + 64 * 1024       # the PDF plus multipart headers
 
 # Requests per minute per visitor. /chat also has its own daily cap per user.
-RATES = {"/matches": 60, "/resume": 5, "/chat": 20, "/feedback": 120, "/prefs": 30}
+RATES = {"/matches": 60, "/resume": 5, "/chat": 20, "/feedback": 120, "/prefs": 30,
+         "/bugs": 5}
 WINDOW = 60.0
 
 _hits: dict[tuple[str, str], deque] = defaultdict(deque)

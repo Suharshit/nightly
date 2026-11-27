@@ -20,7 +20,7 @@ export function ThemeToggle() {
 
   return (
     <button onClick={toggle} aria-label={dark ? "Switch to day theme" : "Switch to night theme"}
-            className="rounded-full border border-line p-2 text-muted hover:text-text">
+            className="border border-text p-1.5 text-text hover:bg-card">
       {dark ? (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              strokeWidth="2" strokeLinecap="round" aria-hidden="true">
