@@ -34,6 +34,7 @@ class Request:
     log_shown: bool = True
     defer_shown: bool = False  # don't log here; Result.shown_by tells the caller whom to log for
     new_only: bool = False   # "New since yesterday": only jobs the latest nightly run added
+    hide_unknown_level: bool = True  # with a level, leave out jobs stating no level or years
 
 
 @dataclass
@@ -89,7 +90,8 @@ def run(pool, embedder, reranker, req: Request, user: dict | None) -> Result:
         qvec = p.resume_vec if req.use_vector else None
 
     f = Filters(level=level, cities=cities, remote=remote,
-                exclude_ids=p.exclude_ids if p else [], new_only=req.new_only)
+                exclude_ids=p.exclude_ids if p else [], new_only=req.new_only,
+                hide_unknown_level=req.hide_unknown_level)
     with stage("search"), pool.connection() as conn, conn.cursor() as cur:
         jobs = search(cur, keyword_text, qvec, f, use_keyword=req.use_keyword,
                       use_vector=req.use_vector, limit=FUSED,

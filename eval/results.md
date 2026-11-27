@@ -16,16 +16,17 @@ Invented jobs = share of turns where the reply named a job no tool returned (the
 <!-- search-eval:start -->
 ## Search
 
-Snapshot frozen 2026-11-25T18:33+00:00 (1798 active jobs). 50 queries, 1825 hand labels. Run 2026-11-27T18:29+00:00 by `python -m eval.run_search_eval`.
+Snapshot frozen 2026-11-25T18:33+00:00 (1798 active jobs). 50 queries, 1825 hand labels. Run 2026-11-27T18:51+00:00 by `python -m eval.run_search_eval`.
 
 | Variant | NDCG@10 | Recall@30 | MRR | judged@10 | p50 ms |
 | --- | --- | --- | --- | --- | --- |
-| keyword only | 0.566 | 0.729 | 0.787 | 1.000 | 105 |
-| vector only | 0.574 | 0.653 | 0.832 | 1.000 | 107 |
-| hybrid RRF | 0.640 | 0.864 | 0.884 | 1.000 | 126 |
-| hybrid + rerank | 0.690 | 0.870 | 0.882 | 0.998 | 653 |
-| + freshness & diversity | 0.610 | 0.881 | 0.821 | 0.992 | 661 |
-| as served (query) | 0.694 | 0.878 | 0.882 | 0.996 | 639 |
+| keyword only | 0.565 | 0.725 | 0.787 | 1.000 | 115 |
+| vector only | 0.574 | 0.653 | 0.832 | 1.000 | 139 |
+| hybrid RRF | 0.639 | 0.864 | 0.884 | 1.000 | 144 |
+| hybrid + rerank | 0.689 | 0.868 | 0.882 | 0.994 | 692 |
+| + freshness & diversity | 0.608 | 0.877 | 0.821 | 0.986 | 792 |
+| as served (query) | 0.693 | 0.874 | 0.882 | 0.996 | 673 |
+| as served, unknown level shown | 0.690 | 0.864 | 0.882 | 0.998 | 686 |
 <!-- search-eval:end -->
 
 <!-- extract-eval:start -->
