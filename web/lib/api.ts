@@ -40,6 +40,7 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export const api = {
   me: () => call<Me>("/me"),
+  deleteMe: () => call<{ deleted: boolean }>("/me", { method: "DELETE" }),
   feed: () => call<Matches>("/matches?limit=5"),
   search: (q: string) => call<Matches>(`/matches?limit=5&q=${encodeURIComponent(q)}`),
   chat: (message: string) =>

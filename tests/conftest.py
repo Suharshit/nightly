@@ -59,16 +59,23 @@ class FakePool:
 
 
 FakeCursor.cursor = lambda self: self
+FakeCursor.transaction = lambda self: self  # the cursor is also a no-op context manager
 
 
 class FakeAuth:
     USERS = {"good-token": {"id": "00000000-0000-0000-0000-0000000000aa",
                             "email": "student@example.com"}}
 
+    def __init__(self):
+        self.forgotten: list[str] = []
+
     def user(self, token):
         if token not in self.USERS:
             raise HTTPException(401, "Invalid or expired sign-in. Please sign in again.")
         return self.USERS[token]
+
+    def forget(self, user_id):
+        self.forgotten.append(user_id)
 
 
 @pytest.fixture

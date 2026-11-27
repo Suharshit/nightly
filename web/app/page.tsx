@@ -18,10 +18,14 @@ export default function Landing() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [deleted, setDeleted] = useState(false);
+
   // Remember where the visitor came from (?ref=wa_share, wa_group, linkedin) for signup stats.
   useEffect(() => {
-    const ref = new URLSearchParams(window.location.search).get("ref");
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
     if (ref && !localStorage.getItem("ref")) localStorage.setItem("ref", ref.slice(0, 32));
+    setDeleted(params.get("deleted") === "1");
   }, []);
 
   // Signed in: onboarding first if there is no resume yet, else the feed.
@@ -66,6 +70,11 @@ export default function Landing() {
 
   return (
     <div className="flex flex-1 flex-col justify-center gap-8 pb-10">
+      {deleted && (
+        <p role="status" className="rounded-2xl bg-card px-4 py-3 text-sm">
+          Your account and all your data are deleted.
+        </p>
+      )}
       <section>
         <div className="mb-6 text-text"><Mark size={48} /></div>
         <h1 className="font-display text-3xl font-medium leading-tight tracking-tight">

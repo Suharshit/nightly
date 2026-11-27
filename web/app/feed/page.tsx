@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { DeleteData } from "@/components/DeleteData";
 import { JobCard } from "@/components/JobCard";
 import { Nav } from "@/components/Nav";
 import { ApiError, api } from "@/lib/api";
@@ -60,6 +61,12 @@ export default function Feed() {
       ) : (
         <div className="flex flex-col gap-3">
           {jobs.map((j) => <JobCard key={j.id} job={j} />)}
+        </div>
+      )}
+
+      {session && (
+        <div className="mt-8 flex flex-col">
+          <DeleteData />
         </div>
       )}
     </div>

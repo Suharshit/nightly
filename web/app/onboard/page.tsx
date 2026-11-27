@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -89,6 +90,10 @@ export default function Onboard() {
             {skills.length ? `Found: ${skills.slice(0, 8).join(", ")}` : "Read it, but found no skills we know yet."}
           </p>
         )}
+        <p className="mt-2 text-xs text-muted">
+          We keep only your resume&apos;s text, to match you with jobs, and never share it.
+          Delete it any time from Matches. <Link href="/privacy" className="underline">Privacy</Link>
+        </p>
       </section>
 
       <section>
