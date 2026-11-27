@@ -1,0 +1,39 @@
+{"id": "a01", "tools": ["search_jobs"], "args": {"search_jobs": {"seniority": "Internship", "skills": ["python"]}}}
+{"id": "a01", "tools": ["search_jobs"], "args": {"search_jobs": {"seniority": "student"}}}
+{"id": "a02", "tools": ["search_jobs"], "args": {"search_jobs": {"cities": ["Bengaluru"]}}}
+{"id": "a03", "tools": ["search_jobs"], "args": {"search_jobs": {"seniority": "fresher", "work_mode": "any"}}}
+{"id": "a04", "tools": ["search_jobs"], "args": {}}
+{"id": "a05", "tools": ["search_jobs"], "args": {"search_jobs": {"work_mode": "remote", "skills": ["devops"]}}}
+{"id": "a06", "tools": ["search_jobs"], "args": {"search_jobs": {"seniority": "student", "skills": ["pytorch", "python"]}}}
+{"id": "a07", "tools": ["search_jobs"], "args": {"search_jobs": {"seniority": "fresher", "cities": ["pune", "hyderabad"]}}}
+{"id": "a08", "tools": ["search_jobs"], "args": {"search_jobs": {"work_mode": "remote"}}}
+{"id": "a09", "tools": ["search_jobs"], "args": {}}
+{"id": "a10", "tools": ["update_prefs"], "args": {"update_prefs": {"field": "level", "value": "fresher", "op": "set"}}}
+{"id": "a11", "tools": ["update_prefs"], "args": {"update_prefs": {"field": "remote", "value": true, "op": "set"}}}
+{"id": "a10", "tools": ["update_prefs", "search_jobs"], "args": {"update_prefs": {"field": "level", "value": "fresher", "op": "set"}, "search_jobs": {"seniority": "fresher"}}}
+{"id": "a11", "tools": ["update_prefs", "search_jobs"], "args": {"update_prefs": {"field": "remote", "value": true, "op": "set"}, "search_jobs": {"work_mode": "remote"}}}
+{"id": "a12", "tools": ["update_prefs", "search_jobs"], "args": {"update_prefs": {"field": "cities", "value": "Pune", "op": "add"}, "search_jobs": {"cities": ["Pune"]}}}
+{"id": "a13", "tools": ["update_prefs"], "args": {"update_prefs": {"field": "cities", "value": "Hyderabad", "op": "add"}}}
+{"id": "a14", "tools": ["update_prefs"], "args": {"update_prefs": {"field": "cities", "value": "Bengaluru", "op": "remove"}}}
+{"id": "a15", "tools": ["update_prefs", "search_jobs"], "args": {"update_prefs": {"field": "level", "value": "student", "op": "set"}, "search_jobs": {"seniority": "student"}}}
+{"id": "a16", "tools": ["update_prefs"], "args": {"update_prefs": {"field": "remote", "value": false, "op": "set"}}}
+{"id": "a17", "tools": ["get_job"], "args": {"get_job": {"job_id": 999}}}
+{"id": "a18", "tools": ["explain_match"], "args": {"explain_match": {"job_id": 1445}}}
+{"id": "a19", "tools": ["record_feedback"], "args": {"record_feedback": {"action": "like"}}}
+{"id": "a20", "tools": ["record_feedback"], "args": {"record_feedback": {"job_id": 1442, "action": "dislike", "reason": "too_senior"}}}
+{"id": "a21", "tools": ["record_feedback", "search_jobs"], "args": {"record_feedback": {"action": "dislike", "reason": "too_senior"}, "search_jobs": {"seniority": "fresher"}}}
+{"id": "a22", "tools": ["explain_match"], "args": {"explain_match": {"job_id": 1026}}}
+{"id": "a23", "tools": ["update_prefs", "search_jobs"], "args": {"update_prefs": {"field": "level", "value": "junior", "op": "set"}, "search_jobs": {"seniority": "junior"}}}
+{"id": "a24", "tools": [], "args": {}}
+{"id": "a25", "tools": [], "args": {}}
+{"id": "a26", "tools": [], "args": {}}
+{"id": "a27", "tools": [], "args": {}}
+{"id": "a28", "tools": ["search_jobs"], "args": {}}
+{"id": "a29", "tools": ["update_prefs", "search_jobs"], "args": {"update_prefs": {"field": "remote", "value": true, "op": "set"}, "search_jobs": {"work_mode": "remote"}}}
+{"id": "a30", "tools": ["search_jobs"], "args": {}}
+{"id": "a31", "tools": ["search_jobs"], "args": {}}
+{"id": "a32", "tools": ["search_jobs"], "args": {}}
+{"id": "a33", "tools": ["update_prefs"], "args": {"update_prefs": {"field": "roles", "value": "sales", "op": "remove"}}}
+{"id": "a34", "tools": ["update_prefs", "search_jobs"], "args": {"update_prefs": {"field": "cities", "value": "Mumbai", "op": "add"}, "search_jobs": {"seniority": "student", "cities": ["Mumbai"]}}}
+{"id": "a35", "tools": [], "args": {}}
+{"id": "a36", "tools": ["get_job"], "args": {"get_job": {"job_id": 4242}}}

@@ -2,6 +2,7 @@
 
   python -m eval.run_agent_eval                          # both models, all labelled turns
   python -m eval.run_agent_eval --models openai/gpt-oss-120b --case a17
+  python -m eval.run_agent_eval --rescore                # re-score the saved runs (no API calls)
 
 Needs DATABASE_URL (the database with the `eval` snapshot) and GROQ_API_KEY. Every turn runs
 inside one transaction that is rolled back: a throwaway user, its saved prefs and the earlier
@@ -21,7 +22,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 
 from eval.agent_common import load_agent_labels, load_cases, score
-from eval.common import ROOT, load_models
+from eval.common import ROOT, load_jsonl, load_models
 
 MODELS = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
 RESUME_SKILLS = ["python", "sql", "django", "git", "rest api"]
@@ -140,8 +141,7 @@ def summarise(runs: list[dict], labels: dict) -> list[dict]:
     return rows
 
 
-def table(rows: list[dict]) -> str:
-    when = datetime.now(UTC).isoformat(timespec="minutes")
+def table(rows: list[dict], when: str) -> str:
     lines = [f"{rows[0]['turns']} hand-labelled chat turns (eval/convos.jsonl, labels in "
              f"eval/agent_labels.jsonl), no fallback model. Run {when} by "
              f"`python -m eval.run_agent_eval`.", "",
@@ -154,7 +154,9 @@ def table(rows: list[dict]) -> str:
                      f"{r['hallucinated']:.0%} | {r['p50_ms']:.0f} | {r['p95_ms']:.0f} | "
                      f"{r['prompt_tokens']:.0f} |")
     lines += ["", "Invented jobs = share of turns where the reply named a job no tool returned "
-              "(the guardrail removed it before the user saw it)."]
+              "(the guardrail removed it before the user saw it). Latency includes waiting for "
+              "Groq's free-tier limit of 8K tokens a minute: with no fallback model, a turn that "
+              "hits it waits up to 20 s, so p50/p95 measure the free tier more than the model."]
     return "\n".join(lines)
 
 
@@ -174,8 +176,17 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--models", nargs="+", default=MODELS)
     p.add_argument("--case")
+    p.add_argument("--rescore", action="store_true",
+                   help="score eval/agent_runs.jsonl against the current labels; no API calls")
     a = p.parse_args()
     labels = load_agent_labels()
+    if a.rescore:
+        runs = [r for r in load_jsonl(RUNS) if r["id"] in labels]
+        when = datetime.fromtimestamp(RUNS.stat().st_mtime, UTC).isoformat(timespec="minutes")
+        section = table(summarise(runs, labels), when)
+        print(section)
+        write(section)
+        return
     cases = [c for c in load_cases() if c["id"] in labels and (not a.case or c["id"] == a.case)]
     if not cases:
         raise SystemExit("No labelled turns yet. Run: python -m eval.label_agent")
@@ -190,7 +201,7 @@ def main() -> None:
         conn.close()
     with RUNS.open("w", encoding="utf-8", newline="\n") as f:
         f.writelines(json.dumps(r, ensure_ascii=False) + "\n" for r in runs)
-    section = table(summarise(runs, labels))
+    section = table(summarise(runs, labels), datetime.now(UTC).isoformat(timespec="minutes"))
     print("\n" + section)
     if not a.case:
         write(section)
