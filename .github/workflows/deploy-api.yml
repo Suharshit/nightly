@@ -46,6 +46,8 @@ jobs:
           DATABASE_URL: postgresql://x:x@127.0.0.1:1/x
           SUPABASE_URL: https://example.supabase.co
           SUPABASE_ANON_KEY: x
+          # As on Spaces, where SSR is on by default; app.py must switch it off to keep its port.
+          GRADIO_SSR_MODE: "true"
         run: |
           python app.py > app.log 2>&1 &
           for i in $(seq 1 90); do
