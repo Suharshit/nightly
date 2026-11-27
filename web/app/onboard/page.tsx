@@ -60,7 +60,10 @@ export default function Onboard() {
     setBusy(true);
     setError(null);
     try {
-      await api.setPrefs({ roles, cities, remote, level: level ?? undefined });
+      // Where this user came from (?ref=...), saved on the landing page, for signup stats.
+      const saved = (localStorage.getItem("ref") || "").toLowerCase();
+      const ref = /^[a-z0-9_-]{1,32}$/.test(saved) ? saved : undefined;
+      await api.setPrefs({ roles, cities, remote, level: level ?? undefined, ref });
       router.push("/feed");
     } catch (e) {
       setError((e as Error).message);

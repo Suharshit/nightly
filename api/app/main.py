@@ -11,7 +11,9 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from api.app import admin as adm
 from api.app import profile as prof
+from api.app.admin import admin_user, is_admin
 from api.app.agent.loop import Agent
 from api.app.auth import current_user, optional_user
 from api.app.resume import MAX_BYTES, ResumeError, embed_text, pdf_text, resume_skills
@@ -150,6 +152,13 @@ class Prefs(BaseModel):
     cities: list[str] | None = None
     remote: bool | None = None
     level: Literal["student", "fresher", "junior"] | None = None
+    # Where the user came from (?ref=wa_share, wa_group, linkedin) for signup stats.
+    ref: str | None = Field(default=None, pattern=r"^[a-z0-9_-]{1,32}$")
+
+
+# The first source wins: later visits from other links do not overwrite it.
+SET_REF = ("update profiles set prefs = coalesce(prefs, '{}') || jsonb_build_object('ref', %s) "
+           "where user_id = %s and not coalesce(prefs, '{}') ? 'ref' returning prefs")
 
 
 @app.patch("/prefs")
@@ -157,11 +166,24 @@ def set_prefs(request: Request, body: Prefs,
               user: Annotated[dict, Depends(current_user)]) -> dict:
     """Onboarding chips: role type, location, experience. Only the fields sent change."""
     patch = body.model_dump(exclude_unset=True)
+    ref = patch.pop("ref", None)
     with request.app.state.pool.connection() as conn, conn.cursor() as cur:
         try:
-            return {"prefs": prof.update_prefs(cur, user, patch)}
+            prefs = prof.update_prefs(cur, user, patch)
         except ValueError as e:
             raise HTTPException(422, str(e)) from e
+        if ref:
+            cur.execute(SET_REF, (ref, user["id"]))
+            row = cur.fetchone()
+            prefs = row[0] if row else prefs
+    return {"prefs": prefs}
+
+
+@app.get("/stats")
+def stats(request: Request, user: Annotated[dict, Depends(admin_user)]) -> dict:
+    """Usage numbers for the README: users, chat, feedback, jobs. Admins only."""
+    with request.app.state.pool.connection() as conn, conn.cursor() as cur:
+        return adm.stats(cur)
 
 
 SAVE_RESUME = """
@@ -270,7 +292,8 @@ def chat(request: Request, body: ChatIn,
     st = request.app.state
     if st.llm is None:
         raise HTTPException(503, "Chat is not configured on this server.")
-    used, oldest = chat_quota(st.pool, user["id"])
+    admin = is_admin(user)                 # the owner tests without the cap
+    used, oldest = (0, None) if admin else chat_quota(st.pool, user["id"])
     if used >= CHAT_DAILY_LIMIT:
         wait = "tomorrow"
         if oldest is not None:
