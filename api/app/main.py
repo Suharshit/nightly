@@ -7,7 +7,16 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response, UploadFile
+from fastapi import (
+    BackgroundTasks,
+    Depends,
+    FastAPI,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    UploadFile,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -99,10 +108,16 @@ def health(request: Request) -> dict:
     return {"ok": True, "db_ms": db_ms}
 
 
+def log_shown_later(pool, user_id: str, job_ids: list[int]) -> None:
+    with pool.connection() as conn, conn.cursor() as cur:
+        prof.log_shown(cur, user_id, job_ids)
+
+
 @app.get("/matches", response_model=Matches)
 def matches(
     request: Request,
     response: Response,
+    background: BackgroundTasks,
     user: Annotated[dict | None, Depends(optional_user)],
     q: Annotated[str, Query(max_length=200)] = "",
     level: Literal["student", "fresher", "junior"] | None = None,
@@ -120,12 +135,15 @@ def matches(
     started = time.perf_counter()
     req = pipeline.Request(q=q, level=level, cities=city or [], remote=remote, limit=limit,
                            use_keyword=keyword, use_vector=vector, use_rerank=rerank,
-                           use_profile=personalise, new_only=new)
+                           use_profile=personalise, new_only=new,
+                           log_shown=False, defer_shown=True)
     st = request.app.state
     try:
         res = pipeline.run(st.pool, st.embedder, st.reranker, req, user)
     except pipeline.NeedsQuery as e:
         raise HTTPException(400, str(e)) from e
+    if res.shown_by:   # after the response: the user does not wait for this write
+        background.add_task(log_shown_later, st.pool, res.shown_by, [j["id"] for j in res.jobs])
     took = int((time.perf_counter() - started) * 1000)
     response.headers["Server-Timing"] = ", ".join(
         [f"{name};dur={ms}" for name, ms in res.timings.items()] + [f"total;dur={took}"])
@@ -222,6 +240,7 @@ def upload_resume(request: Request, file: UploadFile,
     with request.app.state.pool.connection() as conn:
         conn.execute(SAVE_RESUME, {"user_id": user["id"], "email": user["email"], "text": text,
                                    "vec": vec, "skills": skills})
+    prof.forget_profile(user["id"])
     return ResumeOut(chars=len(text), skills=skills)
 
 
@@ -262,6 +281,7 @@ def delete_me(request: Request, user: Annotated[dict, Depends(current_user)]) ->
     forget = getattr(request.app.state.auth, "forget", None)
     if forget:
         forget(user["id"])
+    prof.forget_profile(user["id"])
     return {"deleted": True}
 
 

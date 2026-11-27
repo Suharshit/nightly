@@ -29,6 +29,7 @@ class Request:
     use_profile: bool = True
     use_final: bool = True   # freshness + profile terms + diversity; off = rerank/fused order
     log_shown: bool = True
+    defer_shown: bool = False  # don't log here; Result.shown_by tells the caller whom to log for
     new_only: bool = False   # "New since yesterday": only jobs the latest nightly run added
 
 
@@ -38,6 +39,7 @@ class Result:
     level: str | None
     mode: str          # "query" or "feed" (no query: the resume stands in)
     timings: dict[str, float] = field(default_factory=dict)  # ms per stage, in order
+    shown_by: str | None = None    # user to log these jobs as "shown" for, when not logged here
 
 
 class Stages:
@@ -63,8 +65,8 @@ def run(pool, embedder, reranker, req: Request, user: dict | None) -> Result:
     stage = Stages()
     p = None
     if user:
-        with stage("profile"), pool.connection() as conn, conn.cursor() as cur:
-            p = prof.load_profile(cur, user["id"])
+        with stage("profile"):
+            p = prof.cached_profile(pool, user["id"])
     prefs = p.prefs if p else {}
     q = req.q.strip()
     # Explicit request filters win; otherwise the saved preferences apply.
@@ -101,4 +103,5 @@ def run(pool, embedder, reranker, req: Request, user: dict | None) -> Result:
     if p and req.log_shown and jobs:
         with stage("log_shown"), pool.connection() as conn, conn.cursor() as cur:
             prof.log_shown(cur, p.user_id, [j["id"] for j in jobs])
-    return Result(jobs=jobs, level=level, mode=mode, timings=stage.ms)
+    shown_by = p.user_id if p and req.defer_shown and jobs else None
+    return Result(jobs=jobs, level=level, mode=mode, timings=stage.ms, shown_by=shown_by)
