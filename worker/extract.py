@@ -20,7 +20,14 @@ from pydantic import ValidationError
 
 from worker.db import connect
 from worker.llm import DailyLimitReached, GroqBackend, OllamaBackend
-from worker.rules import SENIORITIES, Extraction, needs_llm, rule_extract
+from worker.rules import (
+    SENIORITIES,
+    Extraction,
+    needs_llm,
+    rule_extract,
+    seniority_from_years,
+    stated_years,
+)
 
 log = logging.getLogger("extract")
 
@@ -73,13 +80,26 @@ def snippet(title: str, location: str | None, text: str, budget: int = 1500) -> 
     return f"Title: {title}\nLocation: {location or 'unknown'}\n\n{body}"
 
 
-def merge(rules: Extraction, llm: dict) -> Extraction:
-    """Rules win where they found something; the LLM fills the gaps."""
+def merge(rules: Extraction, llm: dict, text: str = "") -> Extraction:
+    """Rules win where they found something; the LLM fills the gaps, with two checks.
+
+    Years: an LLM number is kept only when the posting states it (stated_years), because
+    the level filter trusts these and the eval found LLM-filled years right only 60-70% of
+    the time. Seniority: never the LLM's guess (43% right); the rules' title/years value,
+    else derived from the kept years, else unknown. Unknown is safer than wrong: the level
+    filter lets unknown through, while a wrong value hides a job or shows a senior one.
+    """
     out = rules.model_dump()
-    for k in ("min_exp_years", "max_exp_years", "seniority", "employment_type", "work_mode",
-              "salary_min_inr", "salary_max_inr"):
+    for k in ("employment_type", "work_mode", "salary_min_inr", "salary_max_inr"):
         if out[k] is None and llm.get(k) is not None:
             out[k] = llm[k]
+    evidence = stated_years(text)
+    for k in ("min_exp_years", "max_exp_years"):
+        v = llm.get(k)
+        if out[k] is None and v is not None and isinstance(v, int) and v in evidence:
+            out[k] = v
+    if out["seniority"] is None:
+        out["seniority"] = seniority_from_years(out["min_exp_years"])
     if len(out["skills"]) < 3:
         extra = [s.strip().lower() for s in llm.get("skills") or [] if s and s.strip()]
         out["skills"] = list(dict.fromkeys(out["skills"] + extra))[:12]
@@ -140,7 +160,7 @@ def run(backend_name: str, model: str | None, limit: int | None, shard: tuple[in
                 for _attempt in range(2):  # brief: retry once, then mark failed
                     try:
                         out, usage = backend.complete(SYSTEM, prompt, SCHEMA)
-                        merged = merge(rules, out)
+                        merged = merge(rules, out, desc)
                     except DailyLimitReached as e:
                         log.warning("stopping: %s", e)
                         conn.commit()
