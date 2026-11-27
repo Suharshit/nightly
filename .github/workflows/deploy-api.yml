@@ -1,0 +1,84 @@
+name: deploy-api
+
+# The API runs on a free Hugging Face Gradio Space (deploy/hf-space). On every change to it,
+# this installs the Space's packages the way the Space does and checks the API starts; on main
+# it uploads the Space folder, and the Space rebuilds. Needs the HF_TOKEN secret and the
+# HF_SPACE variable ("owner/space-name"); without them the upload step is skipped.
+on:
+  push:
+    branches: [main]
+    paths: ["api/**", "worker/**", "deploy/hf-space/**", ".github/workflows/deploy-api.yml"]
+  pull_request:
+    paths: ["api/**", "worker/**", "deploy/hf-space/**", ".github/workflows/deploy-api.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-api-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"   # the Space's README pins 3.12.12 (ZeroGPU offers 3.10/3.12)
+      - name: Assemble the Space folder
+        run: bash deploy/hf-space/assemble.sh space
+      - name: Install Gradio and the requirements together, as the Space does
+        working-directory: space
+        run: |
+          # The CPU build of the same torch version: CI has no GPU and the CUDA wheel is ~2 GB.
+          torch=$(sed -n 's/^torch==//p' requirements.txt)
+          pip install "torch==$torch" --index-url https://download.pytorch.org/whl/cpu
+          gradio=$(sed -n 's/^sdk_version: *//p' README.md)
+          pip install "gradio==$gradio" -r requirements.txt
+      - name: Start app.py and check the API answers
+        working-directory: space
+        env:
+          # Well-formed but fake: the pool connects lazily, so startup does not need a database.
+          DATABASE_URL: postgresql://x:x@127.0.0.1:1/x
+          SUPABASE_URL: https://example.supabase.co
+          SUPABASE_ANON_KEY: x
+        run: |
+          python app.py > app.log 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -sf http://127.0.0.1:7860/openapi.json | grep -q '"/matches"'; then
+              curl -sf http://127.0.0.1:7860/ui/ > /dev/null && echo "API and /ui answer"
+              exit 0
+            fi
+            sleep 2
+          done
+          cat app.log; exit 1
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_SPACE: ${{ vars.HF_SPACE }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Upload to the Space
+        if: env.HF_TOKEN != '' && env.HF_SPACE != ''
+        run: |
+          bash deploy/hf-space/assemble.sh space
+          pip install -q "huggingface_hub>=1.16"
+          python - <<'EOF'
+          import os
+          from huggingface_hub import HfApi
+          HfApi(token=os.environ["HF_TOKEN"]).upload_folder(
+              repo_id=os.environ["HF_SPACE"], repo_type="space", folder_path="space",
+              commit_message=f"Deploy {os.environ['GITHUB_SHA'][:7]}",
+              delete_patterns=["api/**", "worker/**"])  # drop files removed from the repo
+          EOF
+      - name: Say why nothing was uploaded
+        if: env.HF_TOKEN == '' || env.HF_SPACE == ''
+        run: echo "::warning::Set the HF_TOKEN secret and the HF_SPACE variable to deploy."
