@@ -14,6 +14,10 @@ on:
         description: Max jobs per shard (0 = all pending; GitHub turns an empty value into the default)
         default: "10"
 
+# Least privilege: the built-in GITHUB_TOKEN can only read the repo.
+permissions:
+  contents: read
+
 jobs:
   extract:
     runs-on: ubuntu-latest

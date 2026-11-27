@@ -13,6 +13,10 @@ concurrency:
   group: nightly-ingest
   cancel-in-progress: false
 
+# Least privilege: the built-in GITHUB_TOKEN can only read the repo.
+permissions:
+  contents: read
+
 jobs:
   ingest:
     runs-on: ubuntu-latest

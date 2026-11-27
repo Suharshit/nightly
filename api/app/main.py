@@ -21,6 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from api.app import admin as adm
+from api.app import limits
 from api.app import profile as prof
 from api.app.admin import admin_user, is_admin
 from api.app.agent.loop import Agent
@@ -56,6 +57,10 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="nightly", lifespan=lifespan)
+
+# Upload size and rate limits. Added before CORS, so CORS wraps it and its 413/429 answers
+# still carry CORS headers (the browser can then read the message).
+app.middleware("http")(limits.guard)
 
 # The web app calls the API from the browser. APP_BASE_URL may list several origins,
 # comma-separated (e.g. the Vercel URL and a preview URL).
