@@ -30,9 +30,11 @@ docker compose up -d db                    # local Postgres + pgvector, with mig
 .venv/Scripts/python -m pip install -r requirements-dev.txt
 .venv/Scripts/python -m pytest
 .venv/Scripts/python -m ruff check .
-.venv/Scripts/python -m worker.ingest      # fetch all boards into DATABASE_URL
+.venv/Scripts/python -m worker.ingest      # fetch all boards into DATABASE_URL (Supabase: live data)
 .venv/Scripts/python scripts/check_slugs.py
 ```
+
+Two databases in `.env`: `DATABASE_URL` is Supabase (live data and the `eval` snapshot the labels belong to), so ingest, `scripts.migrate`, the evals and a local API all act on it. `DATABASE_URL_LOCAL` is the Docker Postgres; `pytest` always uses it (`tests/conftest.py`) and refuses a non-local URL. To run the API or a script on the local DB, set `DATABASE_URL` to the local URL in that shell first.
 
 ## Cut order (first to go → last)
 

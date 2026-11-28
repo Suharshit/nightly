@@ -184,7 +184,7 @@ cd web && npm install && npm run dev       # http://localhost:3000
 
 ### Evals
 
-The evals read the frozen `eval` schema through `DATABASE_URL`.
+The evals read the frozen `eval` schema through `DATABASE_URL` (the Supabase database, where the labelled snapshot lives). Tests use `DATABASE_URL_LOCAL` instead.
 
 ```sh
 .venv/Scripts/python -m eval.run_search_eval     # search table
