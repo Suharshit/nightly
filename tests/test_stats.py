@@ -23,12 +23,30 @@ def test_is_admin_reads_admin_emails(monkeypatch):
 def test_stats_route_is_admin_only(api, monkeypatch):
     c, _, _ = api
     monkeypatch.setattr(adm, "stats", lambda cur: {"users": {"signups": 3}})
-    assert c.get("/stats").status_code == 401
     monkeypatch.setenv("ADMIN_EMAILS", "owner@example.com")
-    assert c.get("/stats", headers=H).status_code == 403
+    unknown = c.get("/no-such-route", headers=H)
+    # Signed out, a bad token, or not the owner: the same answer as a route that doesn't exist.
+    for headers in ({}, {"Authorization": "Bearer bad-token"}, H):
+        r = c.get("/stats", headers=headers)
+        assert (r.status_code, r.json()) == (404, unknown.json()) == (404, {"detail": "Not Found"})
     monkeypatch.setenv("ADMIN_EMAILS", "student@example.com")
     r = c.get("/stats", headers=H)
     assert r.status_code == 200 and r.json() == {"users": {"signups": 3}}
+
+
+def test_only_admins_get_menu_links(api, monkeypatch):
+    c, _, _ = api
+    monkeypatch.setenv("ADMIN_EMAILS", "owner@example.com")
+    body = c.get("/me", headers=H).text
+    assert "links" not in body and "stats" not in body.lower()
+    monkeypatch.setenv("ADMIN_EMAILS", "student@example.com")
+    assert c.get("/me", headers=H).json()["links"] == [{"label": "Stats", "href": "/stats"}]
+
+
+def test_no_public_api_docs(api):
+    c, _, _ = api
+    for path in ("/docs", "/redoc", "/openapi.json"):
+        assert c.get(path).status_code == 404
 
 
 def test_admins_skip_the_chat_cap(api, monkeypatch):

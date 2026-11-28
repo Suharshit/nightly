@@ -32,6 +32,7 @@ export type Me = {
   has_resume: boolean;
   resume_skills: string[];
   prefs: { roles?: string[]; cities?: string[]; remote?: boolean; level?: string; ref?: string };
+  links?: { label: string; href: string }[];  // extra menu links; only some accounts get any
 };
 
 type Rate = number | null;

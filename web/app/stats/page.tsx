@@ -1,8 +1,9 @@
 "use client";
 
+import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { ApiError, api } from "@/lib/api";
+import { ApiError, call } from "@/lib/api";
 import type { Stats } from "@/lib/types";
 import { useSession } from "@/lib/useSession";
 
@@ -31,16 +32,20 @@ export default function StatsPage() {
   const session = useSession();
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
+    if (session === null) setHidden(true);
     if (!session) return;
-    api.stats().then(setStats, (e) =>
-      setError(e instanceof ApiError && e.status === 403 ? "This page is for admins only." : (e as Error).message));
+    // The API answers 404 to everyone but the owner, as for a route that does not exist.
+    call<Stats>("/stats").then(setStats, (e) =>
+      e instanceof ApiError && (e.status === 404 || e.status === 401)
+        ? setHidden(true) : setError((e as Error).message));
   }, [session]);
 
-  if (session === undefined) return null;
+  if (hidden) notFound();               // the same page as any unknown URL
   if (error) return <p className="page text-sm text-muted">{error}</p>;
-  if (!stats) return <p className="page text-sm text-muted">Counting…</p>;
+  if (!stats) return null;              // say nothing until the API confirms the owner
 
   const { users, chat, feedback, jobs } = stats;
   const sources = Object.entries(users.by_source);

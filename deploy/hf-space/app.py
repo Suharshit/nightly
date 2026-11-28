@@ -36,7 +36,7 @@ if spaces is not None:
 
 with gr.Blocks(title="nightly API") as ui:
     gr.Markdown("The API behind [nightly](https://nightlyjobs.vercel.app). "
-                "Health check: [/health](/health). API docs: [/docs](/docs).")
+                "Health check: [/health](/health).")
     _out = gr.Textbox(visible=False)
     gr.Button(visible=False).click(_gpu_stub, outputs=_out)
 

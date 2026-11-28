@@ -6,9 +6,8 @@ are gone from the tables, so they are not counted either.
 """
 
 import os
-from typing import Annotated
 
-from fastapi import Depends, HTTPException
+from fastapi import HTTPException, Request
 
 from api.app.auth import current_user
 
@@ -21,10 +20,21 @@ def is_admin(user: dict | None) -> bool:
     return bool(user and (user.get("email") or "").lower() in admin_emails())
 
 
-def admin_user(user: Annotated[dict, Depends(current_user)]) -> dict:
+def admin_user(request: Request) -> dict:
+    """The admin, or the same 404 an unknown route gives: anyone else, signed in or not, cannot
+    tell that admin routes exist."""
+    try:
+        user = current_user(request)
+    except HTTPException:
+        user = None
     if not is_admin(user):
-        raise HTTPException(403, "Admins only.")
+        raise HTTPException(404, "Not Found")
     return user
+
+
+# Owner-only menu links. /me sends them to admins only and leaves the field out for everyone
+# else, so the web bundle and other users' responses never name these pages.
+ADMIN_LINKS = [{"label": "Stats", "href": "/stats"}]
 
 
 # Real users: every account except the admins'.

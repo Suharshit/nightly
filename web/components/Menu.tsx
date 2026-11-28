@@ -75,6 +75,9 @@ export function Menu({ session }: { session: Session }) {
           <Link href="/onboard" className={item} onClick={() => setOpen(false)}>Edit preferences</Link>
           <Link href="/bug" className={item} onClick={() => setOpen(false)}>Report a bug</Link>
           <Link href="/privacy" className={item} onClick={() => setOpen(false)}>Privacy</Link>
+          {me?.links?.map((l) => (
+            <Link key={l.href} href={l.href} className={item} onClick={() => setOpen(false)}>{l.label}</Link>
+          ))}
           <button className={item} onClick={signOut}>Sign out</button>
           <div className="border-t border-text px-4 py-3"><DeleteData /></div>
         </div>

@@ -18,6 +18,7 @@ from fastapi import (
     UploadFile,
 )
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from api.app import admin as adm
@@ -56,7 +57,8 @@ async def lifespan(app: FastAPI):
     app.state.pool.close()
 
 
-app = FastAPI(title="nightly", lifespan=lifespan)
+# No /docs, /redoc or /openapi.json: they would list every route, admin ones included, to anyone.
+app = FastAPI(title="nightly", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
 # Upload size and rate limits. Added before CORS, so CORS wraps it and its 413/429 answers
 # still carry CORS headers (the browser can then read the message).
@@ -254,17 +256,22 @@ class Me(BaseModel):
     has_resume: bool
     resume_skills: list[str]
     prefs: dict
+    links: list[dict] | None = None   # admins only; /me leaves the key out for everyone else
 
 
 @app.get("/me", response_model=Me)
-def me(request: Request, user: Annotated[dict, Depends(current_user)]) -> Me:
+def me(request: Request, user: Annotated[dict, Depends(current_user)]) -> JSONResponse:
     with request.app.state.pool.connection() as conn, conn.cursor() as cur:
         cur.execute("select resume_text is not null, coalesce(resume_skills, '{}'), "
                     "coalesce(prefs, '{}') from profiles where user_id = %s", (user["id"],))
         row = cur.fetchone()
-    if row is None:
-        return Me(email=user["email"], has_resume=False, resume_skills=[], prefs={})
-    return Me(email=user["email"], has_resume=row[0], resume_skills=row[1], prefs=row[2])
+    has, skills, prefs = row if row is not None else (False, [], {})
+    body = Me(email=user["email"], has_resume=has, resume_skills=skills, prefs=prefs).model_dump()
+    if is_admin(user):
+        body["links"] = adm.ADMIN_LINKS
+    else:
+        del body["links"]
+    return JSONResponse(body)
 
 
 # Deleting the Supabase login removes everything else: auth identities and sessions, and our
