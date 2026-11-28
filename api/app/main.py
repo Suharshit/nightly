@@ -220,6 +220,13 @@ def stats(request: Request, user: Annotated[dict, Depends(admin_user)]) -> dict:
         return adm.stats(cur)
 
 
+@app.get("/stats/view")
+def stats_view(request: Request, user: Annotated[dict, Depends(admin_user)]) -> dict:
+    """The same numbers as a ready-made panel for the owner's menu (admin.view). Admins only."""
+    with request.app.state.pool.connection() as conn, conn.cursor() as cur:
+        return adm.view(adm.stats(cur))
+
+
 SAVE_RESUME = """
 insert into profiles (user_id, email, resume_text, resume_embedding, resume_skills)
 values (%(user_id)s, %(email)s, %(text)s, %(vec)s::vector, %(skills)s)

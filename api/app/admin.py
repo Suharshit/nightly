@@ -6,6 +6,7 @@ are gone from the tables, so they are not counted either.
 """
 
 import os
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, Request
 
@@ -32,9 +33,10 @@ def admin_user(request: Request) -> dict:
     return user
 
 
-# Owner-only menu links. /me sends them to admins only and leaves the field out for everyone
-# else, so the web bundle and other users' responses never name these pages.
-ADMIN_LINKS = [{"label": "Stats", "href": "/stats"}]
+# Owner-only menu items. /me sends them to admins only and leaves the field out for everyone
+# else. Each names an API path whose answer is a ready-made view (see view()), which the web
+# app draws with a generic panel, so the web app has no stats route, page or labels at all.
+ADMIN_LINKS = [{"label": "Stats", "panel": "/stats/view"}]
 
 
 # Real users: every account except the admins'.
@@ -137,4 +139,75 @@ def stats(cur) -> dict:
                      "expired": ingest[2]}},
         "bugs": {"total": bugs_total, "open": bugs_open, "latest": bugs},
         "excludes": "admin accounts and deleted accounts",
+    }
+
+
+IST = timezone(timedelta(hours=5, minutes=30))
+
+
+def _pct(x) -> str:
+    return "–" if x is None else f"{x * 100:.1f}%"
+
+
+def _ms(x) -> str:
+    return "–" if x is None else f"{round(x)} ms"
+
+
+def _n(x) -> str:
+    return "–" if x is None else str(round(x * 100) / 100)
+
+
+def _when(iso: str) -> str:
+    return datetime.fromisoformat(iso).astimezone(IST).strftime("%d %b %Y, %H:%M IST")
+
+
+def view(s: dict) -> dict:
+    """stats() as a panel the web app draws without knowing what it shows: a title, a note,
+    tables of (label, value) rows, and lists of tagged items. Every label lives here."""
+    u, c, f, j, b = s["users"], s["chat"], s["feedback"], s["jobs"], s["bugs"]
+    last = j["last_ingest"]
+    sources = [[k, str(v)] for k, v in u["by_source"].items()] or [["None yet", "0"]]
+
+    def rows(*pairs):
+        return [[k, str(v)] for k, v in pairs]
+
+    return {
+        "title": "Stats",
+        "note": f"Excludes {s['excludes']}.",
+        "tables": [
+            {"title": "Users", "rows": rows(
+                ("Signups", u["signups"]), ("Last 24 hours", u["signups_24h"]),
+                ("Last 7 days", u["signups_7d"]), ("Uploaded a resume", u["with_resume"]),
+                ("Active in the last 7 days", u["active_7d"]))},
+            {"title": "Signups by source", "rows": sources},
+            {"title": "Chat", "rows": rows(
+                ("Users who chatted", c["users"]), ("Messages", c["messages"]),
+                ("Messages per chatting user", _n(c["messages_per_chat_user"])),
+                ("Agent turns", c["agent_turns"]), ("Valid JSON", _pct(c["json_valid_rate"])),
+                ("Latency p50", _ms(c["latency_ms_p50"])),
+                ("Latency p95", _ms(c["latency_ms_p95"])),
+                ("Answered by fallback model", _pct(c["fallback_rate"])))},
+            {"title": "Feedback", "rows": rows(
+                ("Jobs shown", f["shown"]), ("Likes", f["likes"]), ("Not for me", f["dislikes"]),
+                ("Apply clicks", f["apply_clicks"]), ("Shares", f["shares"]),
+                ("Like rate (of shown)", _pct(f["like_rate"])),
+                ("Apply rate (of shown)", _pct(f["apply_rate"])))},
+            {"title": "Jobs", "rows": rows(
+                ("Active jobs", j["active"]), ("Companies", j["companies"]),
+                ("Last ingest", _when(last["started_at"]) if last else "–"),
+                ("New in last ingest", last["inserted"] if last else "–"),
+                ("Expired in last ingest", last["expired"] if last else "–"))},
+        ],
+        "lists": [{
+            "title": "Bug reports",
+            "aside": f"{b['open']} open · {b['total']} total",
+            "empty": "None yet.",
+            "items": [{
+                "tags": [{"text": f"#{x['id']}"},
+                         {"text": x["status"], "on": x["status"] == "open"}],
+                "meta": _when(x["created_at"]) + (f" · {x['page']}" if x["page"] else ""),
+                "text": x["message"],
+                "foot": x["email"],
+            } for x in b["latest"]],
+        }],
     }

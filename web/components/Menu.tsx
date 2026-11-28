@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { DeleteData } from "@/components/DeleteData";
+import { Panel } from "@/components/Panel";
 import { api } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 import type { Me } from "@/lib/types";
@@ -17,6 +18,7 @@ export function Menu({ session }: { session: Session }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [me, setMe] = useState<Me | null>(null);
+  const [panelPath, setPanel] = useState<string | null>(null);
   const panel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,12 +78,15 @@ export function Menu({ session }: { session: Session }) {
           <Link href="/bug" className={item} onClick={() => setOpen(false)}>Report a bug</Link>
           <Link href="/privacy" className={item} onClick={() => setOpen(false)}>Privacy</Link>
           {me?.links?.map((l) => (
-            <Link key={l.href} href={l.href} className={item} onClick={() => setOpen(false)}>{l.label}</Link>
+            <button key={l.panel} className={item} onClick={() => { setPanel(l.panel); setOpen(false); }}>
+              {l.label}
+            </button>
           ))}
           <button className={item} onClick={signOut}>Sign out</button>
           <div className="border-t border-text px-4 py-3"><DeleteData /></div>
         </div>
       )}
+      {panelPath && <Panel path={panelPath} onClose={() => setPanel(null)} />}
     </div>
   );
 }
