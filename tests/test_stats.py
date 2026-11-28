@@ -23,12 +23,69 @@ def test_is_admin_reads_admin_emails(monkeypatch):
 def test_stats_route_is_admin_only(api, monkeypatch):
     c, _, _ = api
     monkeypatch.setattr(adm, "stats", lambda cur: {"users": {"signups": 3}})
-    assert c.get("/stats").status_code == 401
     monkeypatch.setenv("ADMIN_EMAILS", "owner@example.com")
-    assert c.get("/stats", headers=H).status_code == 403
+    unknown = c.get("/no-such-route", headers=H)
+    # Signed out, a bad token, or not the owner: the same answer as a route that doesn't exist.
+    for path in ("/stats", "/stats/view"):
+        for headers in ({}, {"Authorization": "Bearer bad-token"}, H):
+            r = c.get(path, headers=headers)
+            assert (r.status_code, r.json()) == (404, unknown.json())
+    assert unknown.json() == {"detail": "Not Found"}
     monkeypatch.setenv("ADMIN_EMAILS", "student@example.com")
     r = c.get("/stats", headers=H)
     assert r.status_code == 200 and r.json() == {"users": {"signups": 3}}
+
+
+def test_only_admins_get_menu_links(api, monkeypatch):
+    c, _, _ = api
+    monkeypatch.setenv("ADMIN_EMAILS", "owner@example.com")
+    body = c.get("/me", headers=H).text
+    assert "links" not in body and "stats" not in body.lower()
+    monkeypatch.setenv("ADMIN_EMAILS", "student@example.com")
+    assert c.get("/me", headers=H).json()["links"] == [{"label": "Stats", "panel": "/stats/view"}]
+
+
+SAMPLE = {
+    "users": {"signups": 4, "signups_24h": 1, "signups_7d": 3, "with_resume": 2, "active_7d": 2,
+              "by_source": {"wa_group": 3, "direct": 1}},
+    "chat": {"users": 2, "messages": 5, "messages_per_chat_user": 2.5, "agent_turns": 5,
+             "json_valid_rate": 1.0, "latency_ms_p50": 1234.4, "latency_ms_p95": None,
+             "fallback_rate": 0.0},
+    "feedback": {"shown": 40, "likes": 3, "dislikes": 1, "apply_clicks": 2, "shares": 1,
+                 "like_rate": 0.075, "apply_rate": 0.05},
+    "jobs": {"active": 2070, "companies": 119,
+             "last_ingest": {"started_at": "2026-11-28T02:53:43+00:00", "inserted": 9,
+                             "expired": 2}},
+    "bugs": {"total": 1, "open": 1, "latest": [
+        {"id": 7, "created_at": "2026-11-28T10:00:00+00:00", "page": "/feed",
+         "message": "Apply did nothing", "email": None, "status": "open"}]},
+    "excludes": "admin accounts and deleted accounts",
+}
+
+
+def test_view_is_the_stats_as_a_ready_made_panel(api, monkeypatch):
+    c, _, _ = api
+    monkeypatch.setattr(adm, "stats", lambda cur: SAMPLE)
+    monkeypatch.setenv("ADMIN_EMAILS", "student@example.com")
+    v = c.get("/stats/view", headers=H).json()
+    t = {x["title"]: dict(x["rows"]) for x in v["tables"]}
+    assert v["title"] == "Stats" and v["note"] == "Excludes admin accounts and deleted accounts."
+    assert t["Users"]["Signups"] == "4"
+    assert t["Signups by source"] == {"wa_group": "3", "direct": "1"}
+    assert t["Chat"]["Latency p50"] == "1234 ms" and t["Chat"]["Latency p95"] == "–"
+    assert t["Feedback"]["Like rate (of shown)"] == "7.5%"
+    assert t["Jobs"]["Last ingest"] == "28 Nov 2026, 08:23 IST"
+    (bugs,) = v["lists"]
+    assert bugs["aside"] == "1 open · 1 total"
+    assert bugs["items"] == [{"tags": [{"text": "#7"}, {"text": "open", "on": True}],
+                              "meta": "28 Nov 2026, 15:30 IST · /feed",
+                              "text": "Apply did nothing", "foot": None}]
+
+
+def test_no_public_api_docs(api):
+    c, _, _ = api
+    for path in ("/docs", "/redoc", "/openapi.json"):
+        assert c.get(path).status_code == 404
 
 
 def test_admins_skip_the_chat_cap(api, monkeypatch):

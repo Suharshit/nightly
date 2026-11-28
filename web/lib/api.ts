@@ -1,7 +1,7 @@
 "use client";
 
 import { accessToken } from "@/lib/supabase";
-import type { ChatReply, DislikeReason, Matches, Me, Stats } from "@/lib/types";
+import type { ChatReply, DislikeReason, Matches, Me, PanelView } from "@/lib/types";
 
 // Only `next dev` falls back to a local API. A production build without NEXT_PUBLIC_API_URL
 // must not call localhost: that would reach into the visitor's own machine.
@@ -40,8 +40,8 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export const api = {
   me: () => call<Me>("/me"),
+  panel: (path: string) => call<PanelView>(path),  // paths come from /me's links
   deleteMe: () => call<{ deleted: boolean }>("/me", { method: "DELETE" }),
-  stats: () => call<Stats>("/stats"),
   feed: () => call<Matches>("/matches?limit=10"),
   newSinceYesterday: () => call<Matches>("/matches?limit=3&new=true"),
   search: (q: string) => call<Matches>(`/matches?limit=5&q=${encodeURIComponent(q)}`),

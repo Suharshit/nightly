@@ -8,7 +8,7 @@ import { useSession } from "@/lib/useSession";
 
 const PLACES = ["Matches", "Chat", "Sign in", "Setup", "Other"];
 
-/** Report a bug from inside the app, no GitHub account needed. The owner sees it on /stats. */
+/** Report a bug from inside the app, no GitHub account needed. The owner sees it in their stats view. */
 export default function ReportBug() {
   const session = useSession({ required: false });
   const [message, setMessage] = useState("");

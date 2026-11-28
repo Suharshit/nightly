@@ -18,7 +18,7 @@ The product aims for fewer, better jobs. A job's level is shown only when the po
 - **Apply and Share on WhatsApp** on every card.
 - **New since yesterday:** jobs added by the latest nightly run.
 - **Chat.** An agent with 5 tools: `search_jobs`, `get_job`, `update_prefs`, `record_feedback` and `explain_match`. It can only name jobs that a tool returned this turn, and the server checks this.
-- **Report a bug** from inside the app; reports are listed for the owner on `/stats`.
+- **Report a bug** from inside the app; reports are listed in the owner's stats view.
 - **Delete my data** (in the ••• menu) removes your account and every row tied to it.
 
 <!-- user-flow:start -->
@@ -45,7 +45,7 @@ Every screen uses the same frame: the logo, the theme switch and (once signed in
 
 - **Home.** Shows one job card at a time. The card holds the title, company, place, post date, level, experience, work mode, city, skills, why it matched, and a WhatsApp share link. The bar under it has 👍, 👎 and Apply.
 - **Landing page.** Signed-out visitors get the same frame, with what nightly does and the sign-in box.
-- **Report a bug.** Anyone, signed in or not, can report a bug from the app, without a GitHub account. The owner sees the reports on `/stats`.
+- **Report a bug.** Anyone, signed in or not, can report a bug from the app, without a GitHub account. The owner sees the reports in their stats view (a menu item only the owner gets; the API answers 404 to everyone else).
 <!-- user-flow:end --><!-- user-flow:end -->
 
 ## Architecture
@@ -157,7 +157,7 @@ All numbers below were written by the eval scripts into [eval/results.md](eval/r
 
 ## Usage
 
-_Final numbers from `/stats` are added on Sunday night: signups by source, chats, feedback events, apply clicks and shares._
+_Final numbers from the owner's stats view are added on Sunday night: signups by source, chats, feedback events, apply clicks and shares._
 
 ## Run it locally
 
