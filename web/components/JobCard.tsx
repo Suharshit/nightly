@@ -24,7 +24,23 @@ export function place(j: Job): string {
 export function posted(iso: string | null): string | null {
   if (!iso) return null;
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-  return days <= 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 45) return `${days} days ago`;
+  if (days < 365) {
+    const months = Math.floor(days / 30.4);
+    return months <= 1 ? "over a month ago" : `${months} months ago`;
+  }
+  return days < 730 ? "over a year ago" : "over 2 years ago";
+}
+
+// Jobs older than this get a note that they are still listed. Most active jobs are past it
+// (median 63 days, 28 Nov), and every active job was on its company's board in the latest
+// nightly run (jobs taken down are expired), so old means long-open, not closed.
+const OLD_DAYS = 45;
+
+function stillListed(iso: string | null): boolean {
+  return !!iso && Date.now() - new Date(iso).getTime() >= OLD_DAYS * 86_400_000;
 }
 
 export function shareLink(j: Job): string {
@@ -67,7 +83,10 @@ export function JobDetails({ job, badge, fill = false }:
   return (
     <article className={`box flex flex-col ${fill ? "flex-1" : ""}`}>
       <div className="flex items-center justify-between gap-2 border-b border-text px-4 py-2 text-xs text-muted">
-        <span>{when ? `Posted ${when}` : "Post date not stated"}</span>
+        <span>
+          {when ? `Posted ${when}` : "Post date not stated"}
+          {stillListed(job.posted_at) && " · still on their careers page"}
+        </span>
         {badge}
       </div>
       <div className="px-4 py-4">
